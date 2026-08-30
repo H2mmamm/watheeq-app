@@ -237,7 +237,7 @@ def send_chat(request: Request, deal_id: str, req: MessageRequest):
     if any(k in text for k in ["http://", "https://", "snapchat", "whatsapp", "واتساب", "سناب", "05"]):
         text = "⚠️ [تنبيه أمان وثيق]: تم حجب محتوى التواصل الخارجي لضمان سلامة الضمان المالي."
 
-    msg = {"sender": html.escape(req.sender), "text": html.escape(text), "time": "الآن"}
+    msg = {"sender": html.escape(req.sender), "text": text, "time": "الآن"}
     deal["messages"].append(msg)
     save_deal(deal)
     return {"status": "success", "messages": deal["messages"]}
@@ -259,7 +259,7 @@ def serve_verify_page():
 </body>
 </html>"""
 
-# صفحة تسجيل الدخول والإنشاء بنظام الترجمة الشامل المحدث
+# صفحة تسجيل الدخول والإنشاء بنظام الترجمة الشامل الصحيح
 @app.get("/login", response_class=HTMLResponse)
 def serve_login():
     return """<!DOCTYPE html>
@@ -536,7 +536,7 @@ def serve_deal_room(deal_id: str):
                 <div class="flex justify-between text-emerald-400 border-t border-white/10 pt-2 text-sm font-bold"><span>المجموع:</span><span>{deal['total_paid']:,} ريال</span></div>
             </div>
             <div class="pt-4">
-                {'<button onclick="document.getElementById(\'payModal\').classList.remove(\'hidden\'); document.getElementById(\'payModal\').classList.add(\'flex\');" class="w-full bg-white text-black font-bold py-3 rounded-2xl text-xs">إيداع وتجميد المبلغ بالخزينة 🔒</button>' if is_pending else '<button onclick="release()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-2xl text-xs">تأكيد الاستلام وتحويل للبائع ✅</button>'}
+                {'<button onclick="document.getElementById(\'payModal\').classList.remove(\'hidden\'); document.getElementById(\'payModal\'].classList.add(\'flex\');" class="w-full bg-white text-black font-bold py-3 rounded-2xl text-xs">إيداع وتجميد المبلغ بالخزينة 🔒</button>' if is_pending else '<button onclick="release()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-2xl text-xs">تأكيد الاستلام وتحويل للبائع ✅</button>'}
             </div>
         </div>
 
@@ -560,7 +560,7 @@ def serve_deal_room(deal_id: str):
     <script>
         const dealId = "{deal['id']}";
         async function pay(m) {
-            const res = await fetch('/api/deals/'+dealId+'/pay', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({payment_method:m})});
+            const res = a = await fetch('/api/deals/'+dealId+'/pay', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({payment_method:m})});
             if(res.ok) location.reload();
         }
         async function release() {
@@ -582,7 +582,7 @@ def serve_deal_room(deal_id: str):
                     const htmlContent = file.type.startsWith('image') 
                         ? `<img src="${e.target.result}" class="max-w-xs rounded-xl mt-2 border border-white/10">` 
                         : `<video src="${e.target.result}" controls class="max-w-xs rounded-xl mt-2 border border-white/10"></video>`;
-                    await postObjMsg('المستخدم (صورة/فيديو مرفق)', htmlContent);
+                    await postMsg('المستخدم (صورة/فيديو مرفق)', htmlContent);
                 };
                 reader.readAsDataURL(file);
             }
