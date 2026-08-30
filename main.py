@@ -125,6 +125,17 @@ def serve_website():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="siteTitle">وثيق | المنصة الشاملة لحماية وتأمين كافة الصفقات</title>
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://safewatheeq.com/">
+    <meta property="og:title" content="وثيق | المنصة الشاملة لحماية وتأمين كافة الصفقات">
+    <meta property="og:description" content="ضمانك الأول لأي صفقة.. بيع واشتر في أي مجال وأنت مرتاح.">
+    <meta property="og:image" content="https://safewatheeq.com/static/logo.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://safewatheeq.com/">
+    <meta name="twitter:title" content="وثيق | المنصة الشاملة لحماية وتأمين كافة الصفقات">
+    <meta name="twitter:description" content="ضمانك الأول لأي صفقة.. بيع واشتر في أي مجال وأنت مرتاح.">
+    <meta name="twitter:image" content="https://safewatheeq.com/static/logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
