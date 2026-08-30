@@ -9,7 +9,7 @@ import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-app = FastAPI(title="وثيق | Watheeq - Escrow & Trust Platform")
+app = FastAPI(title="وثيق | Watheeq - Escrow & Marketplace Platform")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -44,22 +44,34 @@ def init_db():
                 );
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS listings (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(255),
+                    price NUMERIC,
+                    category VARCHAR(100),
+                    country VARCHAR(100),
+                    seller VARCHAR(100),
+                    media_url TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            cur.execute("""
                 INSERT INTO deals (id, title, category, price, fee_percent, fee_amount, total_paid, seller_name, buyer_name, status, status_note, messages)
                 VALUES (
                     'WTQ-701',
                     'عربون حجز وفحص مركبة',
-                    'عربون وفحص المركبات (1% بحد أقصى 50 ريال)',
+                    'مركبات ومعدات وعرابين (1.5%)',
                     2500.0,
-                    1.0,
-                    25.0,
-                    2525.0,
+                    1.5,
+                    37.5,
+                    2537.5,
                     'سعد الشمري (موثق نفاذ ✅)',
                     'أحمد المالكي (موثق نفاذ ✅)',
                     'المبلغ مجمّد بالخزينة (مؤقّت 10 دقائق نشط) 🛡️ ⏳',
-                    'تم سداد 2,525 ريال وتجميدها بأمان عبر Apple Pay في خزينة وثيق.',
+                    'تم سداد 2,537.5 ريال وتجميدها بأمان عبر Apple Pay في خزينة وثيق شاملة عمولة الوساطة.',
                     '[
-                        {"sender": "النظام (أمان وثيق)", "text": "تم استلام 2,525 ريال وتجميدها بنجاح عبر Apple Pay 🔒", "time": "10:00 AM"},
-                        {"sender": "المشتري (أحمد)", "text": "تم تجميد العربون بالمنصة، بانتظار نتيجة الفحص بالورشة.", "time": "10:02 AM"}
+                        {"sender": "النظام (أمان وثيق)", "text": "تم استلام 2,537.5 ريال وتجميدها بنجاح عبر Apple Pay شاملة عمولة الضمان 🔒", "time": "10:00 AM"},
+                        {"sender": "المشتري (أحمد)", "text": "تم تجميد العربون والعمولة بالمنصة، بانتظار إتمام الفحص.", "time": "10:02 AM"}
                     ]'::jsonb
                 )
                 ON CONFLICT (id) DO NOTHING;
@@ -84,21 +96,51 @@ memory_deals = {
     "WTQ-701": {
         "id": "WTQ-701",
         "title": "عربون حجز وفحص مركبة",
-        "category": "عربون وفحص المركبات (1% بحد أقصى 50 ريال)",
+        "category": "مركبات ومعدات وعرابين (1.5%)",
         "price": 2500.0,
-        "fee_percent": 1.0,
-        "fee_amount": 25.0,
-        "total_paid": 2525.0,
+        "fee_percent": 1.5,
+        "fee_amount": 37.5,
+        "total_paid": 2537.5,
         "seller_name": "سعد الشمري (موثق نفاذ ✅)",
         "buyer_name": "أحمد المالكي (موثق نفاذ ✅)",
         "status": "المبلغ مجمّد بالخزينة (مؤقّت 10 دقائق نشط) 🛡️ ⏳",
-        "status_note": "تم سداد 2,525 ريال وتجميدها بأمان عبر Apple Pay في خزينة وثيق.",
+        "status_note": "تم سداد 2,537.5 ريال وتجميدها بأمان عبر Apple Pay في خزينة وثيق شاملة عمولة الوساطة.",
         "messages": [
-            {"sender": "النظام (أمان وثيق)", "text": "تم استلام 2,525 ريال وتجميدها بنجاح عبر Apple Pay 🔒", "time": "10:00 AM"},
-            {"sender": "المشتري (أحمد)", "text": "تم تجميد العربون بالمنصة، بانتظار نتيجة الفحص بالورشة.", "time": "10:02 AM"}
+            {"sender": "النظام (أمان وثيق)", "text": "تم استلام 2,537.5 ريال وتجميدها بنجاح عبر Apple Pay شاملة عمولة الضمان 🔒", "time": "10:00 AM"},
+            {"sender": "المشتري (أحمد)", "text": "تم تجميد العربون والعمولة بالمنصة، بانتظار إتمام الفحص.", "time": "10:02 AM"}
         ]
     }
 }
+
+memory_listings = [
+    {
+        "id": 1,
+        "title": "نيسان باترول بلاتينيوم 2023 - فل كامل",
+        "price": 245000,
+        "category": "مركبات وعرابين",
+        "country": "🇸🇦 السعودية - الرياض",
+        "seller": "أبو فهد (موثق نفاذ ✅)",
+        "media_url": "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&auto=format&fit=crop&q=80"
+    },
+    {
+        "id": 2,
+        "title": "حساب كود MW3 & BO6 نادر (أوريون ولفلات ماكس)",
+        "price": 1400,
+        "category": "أصول رقمية وحسابات",
+        "country": "🇸🇦 السعودية - المدينة",
+        "seller": "مرعب_COD (موثق ✅)",
+        "media_url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80"
+    },
+    {
+        "id": 3,
+        "title": "ساعة رولكس صبمارينر أصلية مع الصندوق والضمان",
+        "price": 42000,
+        "category": "سلع عامة وإلكترونيات",
+        "country": "🇦🇪 الإمارات - دبي",
+        "seller": "الماس الخليج (موثق ✅)",
+        "media_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80"
+    }
+]
 
 def fetch_deal(deal_id: str):
     conn = get_db()
@@ -145,6 +187,14 @@ class CreateDealRequest(BaseModel):
     seller_name: str = Field(..., max_length=50)
     buyer_name: str = Field(default="", max_length=50)
 
+class ListingRequest(BaseModel):
+    title: str
+    price: float
+    category: str
+    country: str
+    seller: str
+    media_url: str
+
 class MessageRequest(BaseModel):
     sender: str
     text: str
@@ -156,15 +206,13 @@ class PaymentConfirmRequest(BaseModel):
 def create_deal(req: CreateDealRequest):
     deal_id = "WTQ-" + ''.join(random.choices(string.digits, k=4))
     
-    fee_percent = 2.5
+    fee_percent = 2.0
+    if "1.5" in req.category:
+        fee_percent = 1.5
+    elif "2.5" in req.category:
+        fee_percent = 2.5
+        
     fee_amount = round((req.price * fee_percent) / 100, 2)
-    
-    if "1%" in req.category:
-        fee_percent = 1.0
-        fee_amount = round((req.price * 1.0) / 100, 2)
-        if ("50" in req.category or "Cap" in req.category) and fee_amount > 50:
-            fee_amount = 50.0
-            
     total_paid = round(req.price + fee_amount, 2)
     
     clean_title = html.escape(req.title)
@@ -182,14 +230,28 @@ def create_deal(req: CreateDealRequest):
         "total_paid": total_paid,
         "seller_name": clean_seller + " (موثق)",
         "buyer_name": clean_buyer,
-        "status": "بانتظار إيداع المشتري عبر (Apple Pay / مدى) ⏳",
-        "status_note": "الصفقة بانتظار إيداع المشتري عبر بوابة الدفع الآمنة (Apple Pay / مدى).",
+        "status": "بانتظار سداد المشتري للضمان والعمولة عبر (Apple Pay / مدى) ⏳",
+        "status_note": f"الصفقة بانتظار سداد إجمالي المبلغ ({total_paid:,} ريال) شاملاً قيمة السلعة وعمولة الوساطة عبر بوابة الدفع الآمنة.",
         "messages": [
-            {"sender": "النظام (أمان وثيق)", "text": f"تم فتح غرفة الضمان المالي ({clean_title}). بانتظار حجز مبلغ {total_paid:,} ريال في الخزينة.", "time": "الآن"}
+            {"sender": "النظام (أمان وثيق)", "text": f"تم فتح غرفة الضمان المالي ({clean_title}). المطلوب سداده شاملاً عمولة المنصة: {total_paid:,} ريال في الخزينة.", "time": "الآن"}
         ]
     }
     save_deal(deal)
     return {"status": "success", "deal_id": deal_id, "deal": deal}
+
+@app.post("/api/listings/create")
+def create_listing(req: ListingRequest):
+    item = {
+        "id": len(memory_listings) + 1,
+        "title": html.escape(req.title),
+        "price": req.price,
+        "category": html.escape(req.category),
+        "country": html.escape(req.country),
+        "seller": html.escape(req.seller) + " (موثق ✅)",
+        "media_url": req.media_url if req.media_url else "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80"
+    }
+    memory_listings.insert(0, item)
+    return {"status": "success", "listing": item}
 
 @app.post("/api/deals/{deal_id}/pay")
 def pay_deal(deal_id: str, req: PaymentConfirmRequest):
@@ -197,8 +259,8 @@ def pay_deal(deal_id: str, req: PaymentConfirmRequest):
     if not deal:
         raise HTTPException(status_code=404, detail="الصفقة غير موجودة")
     deal["status"] = "المبلغ مجمّد بالخزينة (مؤقّت 10 دقائق نشط) 🛡️ ⏳"
-    deal["status_note"] = f"تم إيداع وتجميد المبلغ بنجاح عبر {req.payment_method}. بدأ مؤقت حماية التسليم."
-    deal["messages"].append({"sender": "بوابة الدفع الآمنة", "text": f"💳 تم تأكيد إيداع {deal['total_paid']:,} ريال بنجاح بواسطة {req.payment_method}. المبلغ مجمّد في الخزينة.", "time": "الآن"})
+    deal["status_note"] = f"تم إيداع وتجميد إجمالي المبلغ بنجاح عبر {req.payment_method} شاملاً عمولة الوساطة. بدأ مؤقت حماية التسليم."
+    deal["messages"].append({"sender": "بوابة الدفع الآمنة", "text": f"💳 تم تأكيد إيداع {deal['total_paid']:,} ريال بنجاح (المبلغ + عمولة وثيق). تم تجميد المستحقات بالخزينة.", "time": "الآن"})
     save_deal(deal)
     return deal
 
@@ -208,8 +270,8 @@ def release_funds(deal_id: str):
     if not deal:
         raise HTTPException(status_code=404, detail="الصفقة غير موجودة")
     deal["status"] = "تم التسليم وتحويل المستحقات للبائع بنجاح ✅"
-    deal["status_note"] = "تم تأكيد الاستلام من المشتري، وتم الإفراج عن المبلغ وتحويله للبائع بنجاح."
-    deal["messages"].append({"sender": "النظام (أمان وثيق)", "text": "✅ تم تأكيد الاستلام بنجاح وتحويل المستحقات للبائع فوراً.", "time": "الآن"})
+    deal["status_note"] = f"تم تأكيد الاستلام من المشتري، وتم تحويل صافي مستحقات البائع ({deal['price']:,} ريال) وخصم عمولة الوساطة تلقائياً."
+    deal["messages"].append({"sender": "النظام (أمان وثيق)", "text": f"✅ تم تأكيد الاستلام بنجاح، وتحويل صافي المبلغ ({deal['price']:,} ريال) للبائع بعد اقتطاع عمولة الوساطة.", "time": "الآن"})
     save_deal(deal)
     return deal
 
@@ -219,7 +281,7 @@ def auto_refund_deal(deal_id: str):
     if not deal:
         raise HTTPException(status_code=404, detail="الصفقة غير موجودة")
     deal["status"] = "تم الاسترجاع التلقائي للمشتري ↩️"
-    deal["status_note"] = "تم استرجاع المبلغ لحساب المشتري البنكي فورياً وتلقائياً."
+    deal["status_note"] = "تم استرجاع كامل المبلغ لحساب المشتري البنكي فورياً وتلقائياً لعدم تسليم السلعة."
     deal["messages"].append({"sender": "نظام الحماية التلقائي", "text": "↩️ تم تفعيل الاسترجاع التلقائي وإعادة كامل المبلغ للمشتري لحمايته من التأخير.", "time": "الآن"})
     save_deal(deal)
     return deal
@@ -230,7 +292,7 @@ def dispute_deal(deal_id: str):
     if not deal:
         raise HTTPException(status_code=404, detail="الصفقة غير موجودة")
     deal["status"] = "تم إيقاف الصفقة (نزاع تحت مراجعة الإدارة) ⚠️"
-    deal["status_note"] = "تم رفع اعتراض وتجميد المستحقات تحت مراجعة فريق التحكيم المالي."
+    deal["status_note"] = "تم رفع اعتراض وتجميد المستحقات والعمولة تحت مراجعة فريق التحكيم المالي."
     deal["messages"].append({"sender": "إدارة الرقابة والتحكيم", "text": "⚠️ تم تجميد الصفقة بناءً على طلب أحد الأطراف. يجري تدقيق السجلات من الوسيط.", "time": "الآن"})
     save_deal(deal)
     return deal
@@ -245,7 +307,123 @@ def send_chat(deal_id: str, req: MessageRequest):
     save_deal(deal)
     return {"status": "success", "messages": deal["messages"]}
 
-# صفحة تسجيل الدخول Login
+# صفحة فحص الوثائق Verify المطابقة للصورة
+@app.get("/verify", response_class=HTMLResponse)
+def serve_verify_page():
+    return """<!DOCTYPE html>
+<html lang="en" dir="ltr" id="verifyHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watheeq | Verify Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Tajawal', sans-serif; background-color: #030303; color: #ffffff; }
+        .card-dark { background: rgba(14, 14, 18, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .pill-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #94a3b8; }
+        .pill-btn.active { background: #ffffff; color: #000000; font-weight: 700; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-white selection:text-black">
+
+    <header class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between w-full">
+        <a href="/" class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span class="text-xl font-bold tracking-tight text-white uppercase">Watheeq</span>
+        </a>
+
+        <div class="flex items-center gap-6 text-xs font-medium text-slate-400">
+            <a href="/" class="hover:text-white transition">Product</a>
+            <a href="/#security" class="hover:text-white transition">Security</a>
+            <a href="/#market" class="hover:text-white transition">Contact</a>
+            <button onclick="toggleVerifyLang()" class="border border-white/10 px-3 py-1.5 rounded-full text-slate-300 font-mono" id="vLangBtn">us English ⌄</button>
+            <a href="/verify" class="text-white">Verify</a>
+            <a href="/login" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-slate-200 transition">Sign In</a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center text-center px-6 py-12">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-emerald-400 text-xs font-mono mb-8">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>LIVE VERIFICATION</span>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-3" id="vHead">Verify Document.</h1>
+        <p class="text-xs md:text-sm text-slate-400 mb-8 max-w-md" id="vSubHead">Enter a document ID or scan a QR code to verify authenticity</p>
+
+        <div class="flex items-center gap-3 mb-8">
+            <button onclick="switchMode('scan')" id="btnScan" class="pill-btn active px-6 py-2.5 rounded-full text-xs flex items-center gap-2">
+                <span>📷</span> <span>Start QR Scan</span>
+            </button>
+            <button onclick="switchMode('id')" id="btnId" class="pill-btn px-6 py-2.5 rounded-full text-xs flex items-center gap-2">
+                <span>📝</span> <span>Enter Public ID</span>
+            </button>
+        </div>
+
+        <!-- Camera Box -->
+        <div id="scanBox" class="card-dark rounded-3xl p-8 max-w-sm w-full flex flex-col items-center justify-center text-center mb-4 min-h-[220px]">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center text-2xl mb-4">⚠️</div>
+            <p class="text-xs font-bold text-white mb-1">Unable to start camera. Please check permissions.</p>
+            <p class="text-[11px] text-slate-500 mb-4">Or use manual ID search below</p>
+            <button onclick="alert('Camera access requested')" class="bg-white text-black font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-200">Retry Camera Access</button>
+        </div>
+
+        <!-- Manual ID Search -->
+        <div id="idBox" class="card-dark rounded-3xl p-6 max-w-sm w-full hidden mb-4 text-right">
+            <label class="text-xs text-slate-400 block mb-2">Deal / Document ID:</label>
+            <input id="publicDealId" type="text" placeholder="e.g. WTQ-701" class="w-full bg-black border border-white/10 rounded-xl p-3 text-white text-center font-mono uppercase text-sm mb-3 outline-none focus:border-white/30">
+            <button onclick="lookupDeal()" class="w-full bg-white text-black font-bold text-xs py-2.5 rounded-xl">Inspect Vault Record</button>
+        </div>
+
+        <p class="text-xs text-slate-500 mb-10 font-mono">Or scan QR code</p>
+
+        <div class="flex items-center gap-6 text-xs text-slate-500 font-mono">
+            <span>🛡️ Bank-grade Security</span>
+            <span>⚡ Instant Results</span>
+            <span>⚖️ Zero Knowledge</span>
+        </div>
+    </main>
+
+    <footer class="border-t border-white/5 py-8 max-w-7xl mx-auto px-6 w-full flex justify-between items-center text-xs text-slate-600">
+        <div class="flex items-center gap-2">
+            <span class="text-white font-bold uppercase">Watheeq</span>
+        </div>
+        <div class="flex gap-8">
+            <span>Product</span>
+            <span>Resources</span>
+            <span>Legal</span>
+        </div>
+    </footer>
+
+    <script>
+        function switchMode(m) {
+            if(m === 'scan') {
+                document.getElementById('btnScan').classList.add('active');
+                document.getElementById('btnId').classList.remove('active');
+                document.getElementById('scanBox').classList.remove('hidden');
+                document.getElementById('idBox').classList.add('hidden');
+            } else {
+                document.getElementById('btnId').classList.add('active');
+                document.getElementById('btnScan').classList.remove('active');
+                document.getElementById('scanBox').classList.add('hidden');
+                document.getElementById('idBox').classList.remove('hidden');
+            }
+        }
+        function lookupDeal() {
+            const id = document.getElementById('publicDealId').value.trim();
+            if(id) window.location.href = '/deal/' + id;
+        }
+        function toggleVerifyLang() {
+            alert('Switching Language to Arabic / English');
+        }
+    </script>
+</body>
+</html>"""
+
+# صفحة تسجيل الدخول Login مع Forgot Password
 @app.get("/login", response_class=HTMLResponse)
 @app.get("/issuer/login", response_class=HTMLResponse)
 def serve_login():
@@ -277,7 +455,6 @@ def serve_login():
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-white selection:text-black">
 
-    <!-- Top Header -->
     <header class="px-8 py-6 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3">
             <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -289,28 +466,25 @@ def serve_login():
         <div class="flex items-center gap-6 text-xs font-medium text-slate-400">
             <button onclick="toggleLoginLang()" class="hover:text-white transition font-mono border border-white/10 px-3 py-1.5 rounded-full" id="lLangBtn">EN / AR</button>
             <a href="/" class="hover:text-white transition" id="lHomeLink">Home</a>
-            <a href="/#calculator" class="hover:text-white transition" id="lVerifyLink">Calculator</a>
+            <a href="/verify" class="hover:text-white transition" id="lVerifyLink">Verify</a>
         </div>
     </header>
 
-    <!-- Center Content (Split View) -->
     <main class="max-w-6xl mx-auto px-6 py-12 flex-1 grid grid-cols-1 md:grid-cols-2 gap-16 items-center w-full">
-        
-        <!-- Left Column: Login Form -->
         <div class="max-w-md w-full">
             <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight" id="lHeading">Issuer Login</h1>
-            <p class="text-xs text-slate-400 mb-8" id="lSubHeading">Sign in to your issuer and escrow dashboard</p>
+            <p class="text-xs text-slate-400 mb-8" id="lSubHeading">Sign in to your issuer dashboard</p>
 
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2" id="lEmailLabel">Email / Identifier</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-2" id="lEmailLabel">Email</label>
                     <input type="text" id="loginEmail" value="tuwaiq@tuwaiq.sa" class="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="name@domain.com">
                 </div>
 
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label class="text-xs font-medium text-slate-400" id="lPassLabel">Password</label>
-                        <a href="#" class="text-[11px] text-slate-500 hover:text-white transition" id="lForgot">Forgot password?</a>
+                        <button type="button" onclick="forgotPassword()" class="text-[11px] text-slate-400 hover:text-white transition underline" id="lForgot">Forgot password?</button>
                     </div>
                     <input type="password" id="loginPass" value="••••••••" class="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="••••••••">
                 </div>
@@ -321,11 +495,10 @@ def serve_login():
             </form>
 
             <p class="text-xs text-slate-500 text-center mt-8">
-                <span id="lNoAcc">Don't have an account?</span> <a href="/" class="text-white hover:underline" id="lContact">Create Deal</a>
+                <span id="lNoAcc">Don't have an account?</span> <a href="/" class="text-white hover:underline" id="lContact">Contact us</a>
             </p>
         </div>
 
-        <!-- Right Column: Enterprise Security Visual -->
         <div class="hidden md:flex flex-col items-center justify-center text-center p-8">
             <div class="flex gap-4 mb-8">
                 <div class="card-dark p-4 rounded-2xl w-40 text-left border border-white/10 shadow-2xl">
@@ -342,19 +515,24 @@ def serve_login():
 
             <h3 class="text-xl font-bold text-white mb-2 tracking-tight" id="lSecTitle">Enterprise Security</h3>
             <p class="text-xs text-slate-400 max-w-sm leading-relaxed" id="lSecDesc">
-                Bank-grade encryption and immutable escrow records ensure your deposits and digital transactions remain tamper-proof forever.
+                Bank-grade encryption and immutable blockchain records ensure your documents remain tamper-proof forever.
             </p>
         </div>
-
     </main>
 
-    <!-- Footer -->
     <footer class="px-8 py-6 text-center text-xs text-slate-600 border-t border-white/5 font-mono">
         IMMUTABLE RECORD • BANK-GRADE ESCROW • SAFEWATHEEQ.COM
     </footer>
 
     <script>
         let isEn = true;
+
+        function forgotPassword() {
+            const email = prompt(isEn ? 'Enter your registered email or National ID to reset password:' : 'أدخل بريدك الإلكتروني أو هويتك المسجلة لاستعادة كلمة المرور:');
+            if(email) {
+                alert(isEn ? 'A password reset link with OTP has been dispatched to: ' + email : 'تم إرسال رابط ورمز التحقق لاستعادة كلمة المرور إلى: ' + email);
+            }
+        }
 
         function toggleLoginLang() {
             isEn = !isEn;
@@ -365,33 +543,32 @@ def serve_login():
 
             if(!isEn) {
                 document.getElementById('lHomeLink').innerText = 'الرئيسية';
-                document.getElementById('lVerifyLink').innerText = 'الحاسبة';
+                document.getElementById('lVerifyLink').innerText = 'فحص الوثائق';
                 document.getElementById('lHeading').innerText = 'تسجيل الدخول';
                 document.getElementById('lSubHeading').innerText = 'الدخول إلى لوحة إدارة الصفقات والضمان المالي';
-                document.getElementById('lEmailLabel').innerText = 'البريد الإلكتروني / الهوية';
+                document.getElementById('lEmailLabel').innerText = 'البريد الإلكتروني / الهوية الوطنية';
                 document.getElementById('lPassLabel').innerText = 'كلمة المرور';
                 document.getElementById('lForgot').innerText = 'نسيت كلمة المرور؟';
                 document.getElementById('lSubmitBtn').innerText = 'متابعة الدخول';
                 document.getElementById('lNoAcc').innerText = 'ليس لديك حساب؟';
-                document.getElementById('lContact').innerText = 'إنشاء صفقة فورية';
-                document.getElementById('lSecTitle').innerText = 'أمان مالي مصرفي مشفر';
+                document.getElementById('lContact').innerText = 'تواصل معنا';
+                document.getElementById('lSecTitle').innerText = 'Enterprise Security';
                 document.getElementById('lSecDesc').innerText = 'تشفير بنكي وسجلات غير قابلة للتعديل لضمان بقاء العرابين والصفقات محمية للأبد.';
             } else {
                 document.getElementById('lHomeLink').innerText = 'Home';
-                document.getElementById('lVerifyLink').innerText = 'Calculator';
+                document.getElementById('lVerifyLink').innerText = 'Verify';
                 document.getElementById('lHeading').innerText = 'Issuer Login';
-                document.getElementById('lSubHeading').innerText = 'Sign in to your issuer and escrow dashboard';
-                document.getElementById('lEmailLabel').innerText = 'Email / Identifier';
+                document.getElementById('lSubHeading').innerText = 'Sign in to your issuer dashboard';
+                document.getElementById('lEmailLabel').innerText = 'Email';
                 document.getElementById('lPassLabel').innerText = 'Password';
                 document.getElementById('lForgot').innerText = 'Forgot password?';
                 document.getElementById('lSubmitBtn').innerText = 'Continue';
                 document.getElementById('lNoAcc').innerText = "Don't have an account?";
-                document.getElementById('lContact').innerText = 'Create Deal';
+                document.getElementById('lContact').innerText = 'Contact us';
                 document.getElementById('lSecTitle').innerText = 'Enterprise Security';
-                document.getElementById('lSecDesc').innerText = 'Bank-grade encryption and immutable escrow records ensure your deposits and digital transactions remain tamper-proof forever.';
+                document.getElementById('lSecDesc').innerText = 'Bank-grade encryption and immutable blockchain records ensure your documents remain tamper-proof forever.';
             }
         }
-
         function handleLogin(e) {
             e.preventDefault();
             alert(isEn ? 'Logged in successfully! Redirecting...' : 'تم تسجيل الدخول بنجاح! جاري التحويل...');
@@ -403,26 +580,48 @@ def serve_login():
 
 @app.get("/", response_class=HTMLResponse)
 def serve_home():
-    return """<!DOCTYPE html>
+    listings_cards = ""
+    for item in memory_listings:
+        listings_cards += f"""
+        <div class="card-dark rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/30 transition">
+            <div class="relative h-48 w-full bg-slate-900 overflow-hidden">
+                <img src="{item['media_url']}" alt="{item['title']}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                <span class="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md text-[11px] font-mono text-white border border-white/10">{item['country']}</span>
+                <span class="absolute bottom-3 left-3 bg-emerald-500/80 backdrop-blur-md text-black font-black px-2.5 py-1 rounded-md text-xs">{item['category']}</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between text-right">
+                <div>
+                    <h4 class="text-base font-bold text-white mb-2 line-clamp-1">{item['title']}</h4>
+                    <p class="text-xs text-slate-400 mb-4">👤 المعلن: {item['seller']}</p>
+                </div>
+                <div class="border-t border-white/10 pt-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block">السعر المطلوب</span>
+                        <span class="text-lg font-black text-emerald-400 font-mono">{item['price']:,} ريال</span>
+                    </div>
+                    <button onclick="buyFromMarket('{item['title']}', '{item['category']}', {item['price']}, '{item['seller']}')" class="btn-white text-xs font-bold px-4 py-2 rounded-xl">
+                        شراء بضمان وثيق 🛡️
+                    </button>
+                </div>
+            </div>
+        </div>
+        """
+
+    return f"""<!DOCTYPE html>
 <html lang="ar" dir="rtl" id="htmlTag">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="siteTitle">وثيق | Watheeq - The Immutable Standard</title>
-    
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://safewatheeq.com/">
-    <meta property="og:title" content="Watheeq | الوساطة والضمان المالي الذكي">
-    <meta property="og:description" content="The immutable standard for sovereign trust and secure escrow.">
+    <title id="siteTitle">وثيق | Watheeq - Escrow & Marketplace</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; }
-        .hero-glow {
+        body {{ font-family: 'Tajawal', 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; }}
+        .hero-glow {{
             background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.08) 0%, rgba(3, 3, 3, 0.98) 75%);
-        }
-        .light-streak {
+        }}
+        .light-streak {{
             position: absolute;
             width: 130%;
             height: 320px;
@@ -432,73 +631,103 @@ def serve_home():
             transform: rotate(-10deg);
             pointer-events: none;
             filter: blur(50px);
-        }
-        .card-dark {
+        }}
+        .card-dark {{
             background: rgba(14, 14, 18, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
-        }
-        .card-dark:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-        .btn-white {
+        }}
+        .btn-white {{
             background: #ffffff;
             color: #000000;
             transition: all 0.2s ease;
-        }
-        .btn-white:hover {
+        }}
+        .btn-white:hover {{
             background: #e2e8f0;
             transform: scale(1.02);
-        }
-        .btn-glass {
+        }}
+        .btn-glass {{
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ffffff;
             transition: all 0.2s ease;
-        }
-        .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .pill-badge {
+        }}
+        .pill-badge {{
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        }}
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative selection:bg-white selection:text-black">
 
     <div class="light-streak"></div>
 
+    <!-- شريط توضيح آلية الضمان والعمولة المشتركة -->
+    <div class="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6 text-center text-xs font-semibold text-amber-300 flex items-center justify-center gap-2">
+        <span>🛡️ نظام الضمان الإلزامي:</span>
+        <span>لا يمكن دفع أي مستحقات للطرف الآخر خارج المنصة. يتم إيداع وتجميد كامل قيمة السلعة وعمولة الوساطة بنكياً دفعة واحدة لحماية الطرفين.</span>
+    </div>
+
+    <!-- نافذة توثيق نفاذ / Face ID -->
+    <div id="authModal" class="fixed inset-0 bg-black/90 z-50 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-center relative shadow-2xl">
+            <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 mx-auto flex items-center justify-center text-3xl mb-4">🪪</div>
+            <h3 class="text-xl font-black text-white mb-2">توثيق الهوية الوطنية وبصمة الوجه (نفاذ)</h3>
+            <p class="text-xs text-slate-400 mb-6">لحماية الصفقات من الحسابات الوهمية والاحتيال، يتم ربط هويات البائع والمشتري بنظام التحقق الثنائي.</p>
+            
+            <div class="space-y-3 mb-6 text-right">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">رقم الهوية الوطنية / الإقامة:</label>
+                    <input id="nafathId" type="text" placeholder="1XXXXXXXXX" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm font-mono text-center tracking-widest outline-none focus:border-white/40">
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="simulateNafath()" class="flex-1 btn-white text-xs font-black py-3 rounded-xl">طلب رمز التحقق (نفاذ Face ID) 📱</button>
+                <button onclick="closeAuthModal()" class="px-5 py-3 btn-glass text-xs rounded-xl">إغلاق</button>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-4">🔒 مشفر بنظام التشفير الحكومي ومحمي ضد التزوير</p>
+        </div>
+    </div>
+
     <!-- Navigation Bar -->
     <header class="border-b border-white/5 bg-black/60 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
             <a href="/" class="flex items-center gap-3 cursor-pointer">
                 <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 </svg>
                 <div class="flex flex-col text-right">
-                    <span class="text-lg font-black tracking-tight text-white">وثيق</span>
-                    <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase font-mono">WATHEEQ</span>
+                    <span class="text-lg font-black tracking-tight text-white uppercase">Watheeq</span>
+                    <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase font-mono">الوساطة والضمان المالي</span>
                 </div>
             </a>
             
-            <!-- Nav Links -->
-            <nav class="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-400">
+            <nav class="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-400">
+                <a href="#market" class="hover:text-white transition text-emerald-400">حراج وإعلانات وثيق 🛍️</a>
                 <a href="#calculator" class="hover:text-white transition" id="navCalc">حاسبة العمولات</a>
                 <a href="#security" class="hover:text-white transition" id="navSec">بروتوكول الأمان</a>
                 <a href="/deal/WTQ-701" class="hover:text-white transition" id="navLive">غرفة حية (WTQ-701)</a>
             </nav>
 
-            <!-- Actions -->
             <div class="flex items-center gap-3">
-                <button onclick="toggleLanguage()" id="langBtn" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition">
+                <button onclick="toggleLanguage()" id="langBtn" class="pill-badge text-slate-300 px-3 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition">
                     🌐 English
                 </button>
-                <a href="/login" class="pill-badge text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition flex items-center gap-1.5" id="navSignIn">
+                
+                <button onclick="openAuthModal()" id="nafathBtn" class="pill-badge text-amber-400 border-amber-500/30 bg-amber-500/10 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-500/20 transition flex items-center gap-1">
+                    <span>🛡️</span> <span id="nafathText">نفاذ (Face ID)</span>
+                </button>
+
+                <a href="/verify" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition">
+                    Verify
+                </a>
+
+                <a href="/login" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition">
                     Sign In
                 </a>
-                <button onclick="openModal()" class="btn-white text-xs font-black px-5 py-2 rounded-full shadow-sm hover:scale-105 transition" id="btnNav">
+
+                <button onclick="openModal()" class="btn-white text-xs font-black px-4 py-2 rounded-full shadow-sm hover:scale-105 transition" id="btnNav">
                     + إنشاء صفقة
                 </button>
             </div>
@@ -508,33 +737,29 @@ def serve_home():
     <!-- Main Hero Section -->
     <main class="hero-glow flex-1 flex flex-col items-center justify-center text-center px-6 py-20 relative z-10">
         
-        <!-- Live Status Badge -->
         <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full pill-badge text-emerald-400 text-xs font-mono tracking-wide mb-8">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="heroBadge">V1.0 IS LIVE & SECURE</span>
         </div>
 
-        <!-- Hero Headline -->
         <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.2] max-w-4xl mb-6" id="heroHeadline">
             The immutable<br><span class="text-slate-400 font-light">standard.</span>
         </h1>
 
         <p class="text-slate-400 text-sm md:text-base max-w-2xl mb-10 leading-relaxed font-normal" id="heroSub">
-            المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات بأقل عمولة في السوق (تبدأ من 1%). حجز المبالغ بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.
+            المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات والإعلانات بأقل عمولة في السوق (تبدأ من 1%). يتم سداد وحجز كامل المبلغ مع العمولة بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.
         </p>
 
-        <!-- CTA Buttons -->
         <div class="flex flex-wrap items-center justify-center gap-4 mb-16">
             <button onclick="openModal()" class="btn-white text-sm font-bold px-8 py-3.5 rounded-full flex items-center gap-2" id="heroBtn1">
                 <span>ابدأ صفقة جديدة</span>
                 <span class="text-base">⚡</span>
             </button>
-            <a href="#calculator" class="btn-glass text-sm font-semibold px-8 py-3.5 rounded-full" id="heroBtn2">
-                احسب العمولة المخفضة 🧮
+            <a href="#market" class="btn-glass text-sm font-semibold px-8 py-3.5 rounded-full">
+                تصفح الإعلانات والسوق 🛒
             </a>
         </div>
 
-        <!-- Market Breaker Rates Bar -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full text-right" id="statsContainer">
             <div class="card-dark p-5 rounded-2xl">
                 <p class="text-xs text-slate-400 mb-1" id="stat1Label">الأصول والحسابات والألعاب</p>
@@ -542,22 +767,45 @@ def serve_home():
             </div>
             <div class="card-dark p-5 rounded-2xl">
                 <p class="text-xs text-slate-400 mb-1" id="stat2Label">عربون وفحص السيارات</p>
-                <p class="text-lg font-black text-white font-mono">1% <span class="text-[11px] text-slate-400 font-normal" id="stat2Sub">(حد أقصى 50﷼)</span></p>
+                <p class="text-lg font-black text-white font-mono">1.5% <span class="text-[11px] text-slate-400 font-normal">ضمان فحص</span></p>
             </div>
             <div class="card-dark p-5 rounded-2xl">
                 <p class="text-xs text-slate-400 mb-1" id="stat3Label">مؤقت الاسترجاع التلقائي</p>
-                <p class="text-lg font-black text-white font-mono">10 Min <span class="text-[11px] text-slate-400 font-normal" id="stat3Sub">حماية فورية</span></p>
+                <p class="text-lg font-black text-white font-mono">10 Min <span class="text-[11px] text-slate-400 font-normal">حماية فورية</span></p>
             </div>
             <div class="card-dark p-5 rounded-2xl">
                 <p class="text-xs text-slate-400 mb-1" id="stat4Label">بوابات الدفع المشفرة</p>
-                <p class="text-lg font-black text-white font-mono">Pay / مدى</p>
+                <div class="flex items-center gap-2 text-white mt-1">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.78-8.08-12.28-15-6.3-9.76-11.38-20.91-15.24-33.45-3.86-12.54-5.79-24.3-5.79-35.28 0-14.28 3.57-26.15 10.72-35.61 7.15-9.46 16.29-14.32 27.42-14.58 4.8.12 10.33 1.34 16.59 3.66 6.26 2.32 10.02 3.54 11.28 3.66 2.01-.33 6.07-1.74 12.18-4.23 6.11-2.49 11.66-3.62 16.65-3.39 12.77 1.07 22.84 5.98 30.21 14.74-11.13 6.75-16.58 16.03-16.36 27.84.22 9.25 3.86 16.99 10.92 23.23 7.06 6.24 15.42 9.77 25.08 10.6-2.12 6.53-4.78 13.06-7.98 19.59zM119.22 33.64c0-7.39 2.65-14.35 7.95-20.88 5.3-6.53 11.83-10.72 19.59-12.57.8 7.39-1.63 14.36-7.29 20.91-5.66 6.55-12.41 10.73-20.25 12.54z"/></svg>
+                    <span class="font-bold text-sm">Pay / مدى</span>
+                </div>
             </div>
         </div>
 
     </main>
 
+    <!-- Marketplace Section -->
+    <section id="market" class="max-w-6xl mx-auto px-6 py-16 w-full relative z-10">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+            <div class="text-right">
+                <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold mb-2">
+                    🛍️ السوق والوساطة المفتوحة لكافة الدول
+                </div>
+                <h3 class="text-2xl md:text-3xl font-black text-white">إعلانات وسلع معروضة بضمان وثيق</h3>
+                <p class="text-xs text-slate-400">اشتري أي سلعة أو عربون سيارة مشفر بأمان، أو أضف إعلانك الخاص للبيع</p>
+            </div>
+            <button onclick="openListingModal()" class="btn-white text-xs font-bold px-6 py-3 rounded-full flex items-center gap-2">
+                <span>+ أضف إعلان سلعة/سيارة جديد</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {listings_cards}
+        </div>
+    </section>
+
     <!-- Calculator Section -->
-    <section id="calculator" class="max-w-4xl mx-auto px-6 py-16 w-full relative z-10">
+    <section id="calculator" class="max-w-4xl mx-auto px-6 py-12 w-full relative z-10">
         <div class="card-dark p-8 md:p-10 rounded-3xl">
             <div class="text-center mb-8">
                 <h3 class="text-2xl font-black text-white mb-2" id="calcHead">حاسبة كسر السوق والعمولات الشفافة</h3>
@@ -574,30 +822,30 @@ def serve_home():
                     <select id="calcCategory" onchange="runCalculator()" class="w-full bg-black/60 border border-white/10 rounded-2xl p-3.5 text-white text-sm outline-none focus:border-white/40">
                         <option value="digital" id="opt1">الأصول الرقمية، الحسابات، والألعاب (2.5%)</option>
                         <option value="freelance" id="opt2">الخدمات والعمل الحر والبرمجة (2.5%)</option>
-                        <option value="car_deposit" id="opt3">عربون حجز وفحص المركبات (1% بحد أقصى 50 ريال)</option>
-                        <option value="goods" id="opt4">الأجهزة الإلكترونية والسلع (1%)</option>
+                        <option value="car_deposit" id="opt3">عربون حجز وفحص المركبات (1.5%)</option>
+                        <option value="goods" id="opt4">الأجهزة الإلكترونية والسلع (1.5%)</option>
                     </select>
                 </div>
             </div>
 
             <div class="grid grid-cols-3 gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-center mb-6 font-mono">
                 <div>
-                    <span class="block text-[11px] text-slate-500 mb-1" id="resSeller">المبلغ للبائع</span>
+                    <span class="block text-[11px] text-slate-500 mb-1" id="resSeller">المبلغ الصافي للبائع</span>
                     <span id="calcNet" class="text-base md:text-lg font-bold text-white">1,000 ريال</span>
                 </div>
                 <div>
-                    <span class="block text-[11px] text-slate-400 mb-1" id="resFee">عمولة وثيق</span>
+                    <span class="block text-[11px] text-slate-400 mb-1" id="resFee">عمولة وثيق المحسومة</span>
                     <span id="calcFee" class="text-base md:text-lg font-bold text-slate-300">25 ريال</span>
                 </div>
                 <div>
-                    <span class="block text-[11px] text-emerald-400 mb-1" id="resTotal">الإجمالي المطلوب للدفع</span>
+                    <span class="block text-[11px] text-emerald-400 mb-1" id="resTotal">الإجمالي الإلزامي للإيداع</span>
                     <span id="calcTotal" class="text-base md:text-lg font-black text-emerald-400">1,025 ريال</span>
                 </div>
             </div>
 
             <div class="text-center">
                 <button onclick="openModalWithValues()" class="btn-white text-xs font-black px-8 py-3.5 rounded-full" id="calcBtn">
-                    ابدأ بهذه الحسبة المخفضة 🚀
+                    ابدأ بهذه الحسبة وتجميد المبلغ 🚀
                 </button>
             </div>
         </div>
@@ -609,30 +857,32 @@ def serve_home():
             <h3 class="text-2xl font-black text-white mb-2" id="secHead">ترسانة الحماية ومنع الاحتيال</h3>
             <p class="text-xs text-slate-400" id="secSub">آليات مالية صارمة لحماية أموالك وسلعك أثناء البيع والشراء</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-right">
             <div class="card-dark p-6 rounded-2xl">
                 <div class="text-3xl mb-3">⏱️</div>
                 <h4 class="text-sm font-bold text-white mb-2" id="sec1Title">مؤقت الاسترجاع الفوري (10 دقائق)</h4>
-                <p class="text-xs text-slate-400 leading-relaxed" id="sec1Desc">في الصفقات الرقمية والحسابات، إذا لم يقم البائع بتسليم البيانات خلال 10 دقائق، يقوم النظام تلقائياً بإرجاع المبلغ للمشتري.</p>
+                <p class="text-xs text-slate-400 leading-relaxed" id="sec1Desc">في الصفقات الرقمية والحسابات، إذا لم يقم البائع بتسليم البيانات خلال 10 دقائق، يقوم النظام تلقائياً بإرجاع كامل المبلغ للمشتري.</p>
             </div>
             <div class="card-dark p-6 rounded-2xl">
                 <div class="text-3xl mb-3">🚗</div>
                 <h4 class="text-sm font-bold text-white mb-2" id="sec2Title">ضمان عربون فحص السيارات</h4>
-                <p class="text-xs text-slate-400 leading-relaxed" id="sec2Desc">احجز سيارتك وافحصها بالورشة وأنت مطمئن؛ العربون محفوظ ولا يتحول للبائع إلا بموافقتك بعد التأكد من سلامة الفحص.</p>
+                <p class="text-xs text-slate-400 leading-relaxed" id="sec2Desc">احجز سيارتك وافحصها بالورشة وأنت مطمئن؛ العربون محفوظ بالخزينة ولا يتحول للبائع إلا بموافقتك بعد التأكد من سلامة الفحص.</p>
             </div>
             <div class="card-dark p-6 rounded-2xl">
-                <div class="text-3xl mb-3">Pay</div>
-                <h4 class="text-sm font-bold text-white mb-2" id="sec3Title">حجز مصرفي عبر Apple Pay ومدى</h4>
-                <p class="text-xs text-slate-400 leading-relaxed" id="sec3Desc">الأموال لا تذهب لحسابات أفراد شخصية، بل تُجمد بنكياً في خزينة منصة وثيق المحايدة حتى اكتمال التبادل بالكامل.</p>
+                <div class="text-3xl mb-3">
+                    <svg class="w-8 h-8 fill-current text-white mb-1" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.78-8.08-12.28-15-6.3-9.76-11.38-20.91-15.24-33.45-3.86-12.54-5.79-24.3-5.79-35.28 0-14.28 3.57-26.15 10.72-35.61 7.15-9.46 16.29-14.32 27.42-14.58 4.8.12 10.33 1.34 16.59 3.66 6.26 2.32 10.02 3.54 11.28 3.66 2.01-.33 6.07-1.74 12.18-4.23 6.11-2.49 11.66-3.62 16.65-3.39 12.77 1.07 22.84 5.98 30.21 14.74-11.13 6.75-16.58 16.03-16.36 27.84.22 9.25 3.86 16.99 10.92 23.23 7.06 6.24 15.42 9.77 25.08 10.6-2.12 6.53-4.78 13.06-7.98 19.59zM119.22 33.64c0-7.39 2.65-14.35 7.95-20.88 5.3-6.53 11.83-10.72 19.59-12.57.8 7.39-1.63 14.36-7.29 20.91-5.66 6.55-12.41 10.73-20.25 12.54z"/></svg>
+                </div>
+                <h4 class="text-sm font-bold text-white mb-2" id="sec3Title">حجز مصرفي إلزامي عبر Apple Pay ومدى</h4>
+                <p class="text-xs text-slate-400 leading-relaxed" id="sec3Desc">يتم تحصيل وسداد العمولة مع المبلغ في حركة واحدة لمنع التحويلات الخارجية وضمان استلام الحقوق كاملاً.</p>
             </div>
         </div>
     </section>
 
     <!-- Modal إنشاء صفقة -->
     <div id="createModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20">
+        <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
             <h3 class="text-xl font-black text-white mb-1" id="mTitle">إنشاء رابط صفقة وساطة جديد</h3>
-            <p class="text-xs text-slate-400 mb-6" id="mSub">سيتم إنشاء غرفة تسليم مشفرة برابط مباشر للأطراف مع بوابة حجز بنكي.</p>
+            <p class="text-xs text-slate-400 mb-6" id="mSub">سيتم إنشاء غرفة تسليم مشفرة برابط مباشر للأطراف مع بوابة حجز بنكي تشمل العمولة والضمان.</p>
             
             <div class="space-y-4">
                 <div>
@@ -642,14 +892,14 @@ def serve_home():
                 <div>
                     <label class="text-xs text-slate-400 block mb-1" id="mLabel2">القسم والتصنيف</label>
                     <select id="newCategory" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
-                        <option value="digital">الأصول الرقمية والحسابات (2.5%)</option>
-                        <option value="freelance">الخدمات والعمل الحر (2.5%)</option>
-                        <option value="car_deposit">عربون وفحص المركبات (1% بحد أقصى 50 ريال)</option>
-                        <option value="goods">الأجهزة الإلكترونية والسلع (1%)</option>
+                        <option>الأصول الرقمية والحسابات (2.5%)</option>
+                        <option>الخدمات والعمل الحر (2.5%)</option>
+                        <option>مركبات ومعدات وعرابين (1.5%)</option>
+                        <option>الأجهزة الإلكترونية والسلع (1.5%)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 block mb-1" id="mLabel3">المبلغ المطلوب</label>
+                    <label class="text-xs text-slate-400 block mb-1" id="mLabel3">المبلغ المطلوب (ريال)</label>
                     <input id="newPrice" type="number" placeholder="1000" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -665,38 +915,93 @@ def serve_home():
             </div>
 
             <div class="mt-6 flex gap-3">
-                <button onclick="submitDeal()" class="flex-1 btn-white text-xs font-black py-3 rounded-xl" id="mBtnSubmit">إنشاء الرابط وحجز الضمان 🔒</button>
+                <button onclick="submitDeal()" class="flex-1 btn-white text-xs font-black py-3 rounded-xl" id="mBtnSubmit">إنشاء الرابط وحجز الضمان والعمولة 🔒</button>
                 <button onclick="closeModal()" class="px-5 py-3 btn-glass text-xs rounded-xl" id="mBtnCancel">إلغاء</button>
             </div>
         </div>
     </div>
 
+    <!-- Modal إضافة إعلان حراج جديد -->
+    <div id="listingModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
+            <h3 class="text-xl font-black text-white mb-1">إضافة إعلان جديد في حراج وثيق</h3>
+            <p class="text-xs text-slate-400 mb-6">اعرض سلعتك أو سيارتك لكافة الدول مع حماية المشتري والبائع عبر الضمان المالي.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">عنوان الإعلان / السلعة</label>
+                    <input id="listTitle" type="text" placeholder="مثال: لكزس 2024 فل كامل / بي سي قيمنق" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">السعر (ريال)</label>
+                        <input id="listPrice" type="number" placeholder="5000" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 block mb-1">الدولة والمدينة</label>
+                        <select id="listCountry" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                            <option>🇸🇦 السعودية - الرياض</option>
+                            <option>🇸🇦 السعودية - جدة</option>
+                            <option>🇸🇦 السعودية - المدينة</option>
+                            <option>🇦🇪 الإمارات - دبي</option>
+                            <option>🇰🇼 الكويت</option>
+                            <option>🇶🇦 قطر</option>
+                            <option>🇧🇭 البحرين</option>
+                            <option>🇴🇲 عمان</option>
+                            <option>🌍 دولي / أونلاين</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">القسم</label>
+                    <select id="listCategory" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                        <option>مركبات وعرابين</option>
+                        <option>أصول رقمية وحسابات</option>
+                        <option>سلع عامة وإلكترونيات</option>
+                        <option>خدمات وعمل حر</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">رابط صورة أو فيديو السلعة (URL)</label>
+                    <input id="listMedia" type="text" placeholder="https://..." class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">اسم / يوزر البائع</label>
+                    <input id="listSeller" type="text" placeholder="اسمك أو يوزرك" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+                <button onclick="submitListing()" class="flex-1 btn-white text-xs font-black py-3 rounded-xl">نشر الإعلان الآن 📢</button>
+                <button onclick="closeListingModal()" class="px-5 py-3 btn-glass text-xs rounded-xl">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
-    <footer class="border-t border-white/5 py-8 bg-black text-center text-xs text-slate-500 relative z-10 space-y-2">
-        <p id="footerRights">جميع الحقوق محفوظة © منصة وثيق للوساطة والضمان المالي المشترك | safewatheeq.com</p>
-        <p class="text-slate-600" id="footerReg">نظام وساطة رقمي آمن ومعتمد - خاضع للأنظمة التجارية السعودية</p>
+    <footer class="border-t border-white/5 py-8 bg-black text-center text-xs text-slate-500 relative z-10 space-y-2 font-mono">
+        <p id="footerRights">© 2026 WATHEEQ ESCROW & MARKETPLACE | SAFEWATHEEQ.COM</p>
+        <p class="text-slate-600" id="footerReg">SECURE ESCROW • MANDATORY FEE LOCK • ANTI-FRAUD</p>
     </footer>
 
     <script>
         let currentLang = 'ar';
 
-        const i18n = {
-            ar: {
+        const i18n = {{
+            ar: {{
                 langBtn: '🌐 English',
                 navCalc: 'حاسبة العمولات',
                 navSec: 'بروتوكول الأمان',
                 navLive: 'غرفة حية (WTQ-701)',
-                navSignIn: 'Sign In',
                 btnNav: '+ إنشاء صفقة',
-                heroBadge: 'نظام الضمان المالي المشفر نشط 24/7',
+                heroBadge: 'V1.0 IS LIVE & SECURE',
                 heroHeadline: 'The immutable<br><span class="text-slate-400 font-light">standard.</span>',
-                heroSub: 'المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات بأقل عمولة في السوق (تبدأ من 1%). حجز المبالغ بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.',
+                heroSub: 'المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات والإعلانات بأقل عمولة في السوق (تبدأ من 1%). يتم سداد وحجز كامل المبلغ مع العمولة بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.',
                 heroBtn1: 'ابدأ صفقة جديدة ⚡',
-                heroBtn2: 'احسب العمولة المخفضة 🧮',
                 stat1Label: 'الأصول والحسابات والألعاب',
                 stat1Sub: 'أقل عمولة',
                 stat2Label: 'عربون وفحص السيارات',
-                stat2Sub: '(حد أقصى 50﷼)',
+                stat2Sub: 'ضمان فحص',
                 stat3Label: 'مؤقت الاسترجاع التلقائي',
                 stat3Sub: 'حماية فورية',
                 stat4Label: 'بوابات الدفع المشفرة',
@@ -706,49 +1011,28 @@ def serve_home():
                 lblCat: 'مجال الوساطة:',
                 opt1: 'الأصول الرقمية، الحسابات، والألعاب (2.5%)',
                 opt2: 'الخدمات والعمل الحر والبرمجة (2.5%)',
-                opt3: 'عربون حجز وفحص المركبات (1% بحد أقصى 50 ريال)',
-                opt4: 'الأجهزة الإلكترونية والسلع (1%)',
-                resSeller: 'المبلغ للبائع',
-                resFee: 'عمولة وثيق',
-                resTotal: 'الإجمالي المطلوب للدفع',
-                calcBtn: 'ابدأ بهذه الحسبة المخفضة 🚀',
-                secHead: 'ترسانة الحماية ومنع الاحتيال',
-                secSub: 'آليات مالية صارمة لحماية أموالك وسلعك أثناء البيع والشراء',
-                sec1Title: 'مؤقت الاسترجاع الفوري (10 دقائق)',
-                sec1Desc: 'في الصفقات الرقمية والحسابات، إذا لم يقم البائع بتسليم البيانات خلال 10 دقائق، يقوم النظام تلقائياً بإرجاع المبلغ للمشتري.',
-                sec2Title: 'ضمان عربون فحص السيارات',
-                sec2Desc: 'احجز سيارتك وافحصها بالورشة وأنت مطمئن؛ العربون محفوظ ولا يتحول للبائع إلا بموافقتك بعد التأكد من سلامة الفحص.',
-                sec3Title: 'حجز مصرفي عبر Apple Pay ومدى',
-                sec3Desc: 'الأموال لا تذهب لحسابات أفراد شخصية، بل تُجمد بنكياً في خزينة منصة وثيق المحايدة حتى اكتمال التبادل بالكامل.',
-                mTitle: 'إنشاء رابط صفقة وساطة جديد',
-                mSub: 'سيتم إنشاء غرفة تسليم مشفرة برابط مباشر للأطراف مع بوابة حجز بنكي.',
-                mLabel1: 'عنوان الصفقة أو السلعة',
-                mLabel2: 'القسم والتصنيف',
-                mLabel3: 'المبلغ المطلوب (ريال)',
-                mLabel4: 'اسم / يوزر البائع',
-                mLabel5: 'اسم / يوزر المشتري (اختياري)',
-                mBtnSubmit: 'إنشاء الرابط وحجز الضمان 🔒',
-                mBtnCancel: 'إلغاء',
-                footerRights: 'جميع الحقوق محفوظة © منصة وثيق للوساطة والضمان المالي المشترك | safewatheeq.com',
-                footerReg: 'نظام وساطة رقمي آمن ومعتمد - خاضع للأنظمة التجارية السعودية',
+                opt3: 'عربون حجز وفحص المركبات (1.5%)',
+                opt4: 'الأجهزة الإلكترونية والسلع (1.5%)',
+                resSeller: 'المبلغ الصافي للبائع',
+                resFee: 'عمولة وثيق المحسومة',
+                resTotal: 'الإجمالي الإلزامي للإيداع',
+                calcBtn: 'ابدأ بهذه الحسبة وتجميد المبلغ 🚀',
                 curr: ' ريال'
-            },
-            en: {
+            }},
+            en: {{
                 langBtn: '🌐 العربية',
                 navCalc: 'Fee Calculator',
                 navSec: 'Security Protocol',
                 navLive: 'Live Deal (WTQ-701)',
-                navSignIn: 'Sign In',
                 btnNav: '+ Create Deal',
-                heroBadge: 'V1.0 IS LIVE & BANK-GRADE SECURED',
+                heroBadge: 'V1.0 IS LIVE & SECURE',
                 heroHeadline: 'The immutable<br><span class="text-slate-400 font-light">standard.</span>',
-                heroSub: 'The premier Saudi escrow and trust platform. Secure any digital asset, freelance milestone, or car inspection deposit with ultra-low fees starting at 1% via Apple Pay & Mada.',
+                heroSub: 'The premier Saudi escrow and marketplace platform. Full funds and escrow fees must be locked via Apple Pay & Mada before any milestone or asset release.',
                 heroBtn1: 'Start Secure Deal ⚡',
-                heroBtn2: 'Calculate Lowest Fees 🧮',
                 stat1Label: 'Digital Assets & Gaming',
                 stat1Sub: 'Lowest in Market',
                 stat2Label: 'Car Deposit & Inspection',
-                stat2Sub: '(Max 50 SAR Cap)',
+                stat2Sub: 'Inspection Escrow',
                 stat3Label: 'Auto-Refund Timer',
                 stat3Sub: 'Instant Protection',
                 stat4Label: 'Encrypted Payment',
@@ -758,36 +1042,17 @@ def serve_home():
                 lblCat: 'Escrow Category:',
                 opt1: 'Digital Assets, Accounts & Gaming (2.5%)',
                 opt2: 'Freelance, Services & Code (2.5%)',
-                opt3: 'Car Inspection Deposit (1% capped at 50 SAR)',
-                opt4: 'Electronics & General Goods (1%)',
+                opt3: 'Car Inspection Deposit (1.5%)',
+                opt4: 'Electronics & General Goods (1.5%)',
                 resSeller: 'Net to Seller',
                 resFee: 'Watheeq Fee',
                 resTotal: 'Total Deposit Required',
-                calcBtn: 'Start Deal with this Calculation 🚀',
-                secHead: 'Anti-Fraud & Security Suite',
-                secSub: 'Rigorous financial and technical safeguards eliminating transaction fraud',
-                sec1Title: '10-Minute Auto Refund',
-                sec1Desc: 'For fast digital trades, if credentials are not delivered within 10 minutes, full funds automatically refund to the buyer.',
-                sec2Title: 'Vehicle Inspection Deposit',
-                sec2Desc: 'Inspect vehicles with peace of mind. Deposits are held in neutral escrow until you approve the mechanical report.',
-                sec3Title: 'Apple Pay & Mada Escrow Vault',
-                sec3Desc: 'No personal bank transfers. Funds are frozen inside institutional banking vaults until verified completion.',
-                mTitle: 'Create New Escrow Deal Room',
-                mSub: 'Generate an instant encrypted escrow room with integrated checkout.',
-                mLabel1: 'Deal Title / Item Description',
-                mLabel2: 'Category',
-                mLabel3: 'Required Amount (SAR)',
-                mLabel4: 'Seller Username / Name',
-                mLabel5: 'Buyer Username (Optional)',
-                mBtnSubmit: 'Generate Room & Lock Escrow 🔒',
-                mBtnCancel: 'Cancel',
-                footerRights: '© 2026 Watheeq Escrow Inc. All rights reserved | safewatheeq.com',
-                footerReg: 'Compliant with Saudi eCommerce and Digital Escrow Regulations',
+                calcBtn: 'Start Deal & Lock Escrow 🚀',
                 curr: ' SAR'
-            }
-        };
+            }}
+        }};
 
-        function toggleLanguage() {
+        function toggleLanguage() {{
             currentLang = (currentLang === 'ar') ? 'en' : 'ar';
             const htmlTag = document.getElementById('htmlTag');
             const data = i18n[currentLang];
@@ -799,14 +1064,12 @@ def serve_home():
             document.getElementById('navCalc').innerText = data.navCalc;
             document.getElementById('navSec').innerText = data.navSec;
             document.getElementById('navLive').innerText = data.navLive;
-            document.getElementById('navSignIn').innerText = data.navSignIn;
             document.getElementById('btnNav').innerText = data.btnNav;
             
             document.getElementById('heroBadge').innerText = data.heroBadge;
             document.getElementById('heroHeadline').innerHTML = data.heroHeadline;
             document.getElementById('heroSub').innerText = data.heroSub;
             document.getElementById('heroBtn1').innerHTML = data.heroBtn1;
-            document.getElementById('heroBtn2').innerText = data.heroBtn2;
 
             document.getElementById('stat1Label').innerText = data.stat1Label;
             document.getElementById('stat1Sub').innerText = data.stat1Sub;
@@ -829,42 +1092,17 @@ def serve_home():
             document.getElementById('resTotal').innerText = data.resTotal;
             document.getElementById('calcBtn').innerText = data.calcBtn;
 
-            document.getElementById('secHead').innerText = data.secHead;
-            document.getElementById('secSub').innerText = data.secSub;
-            document.getElementById('sec1Title').innerText = data.sec1Title;
-            document.getElementById('sec1Desc').innerText = data.sec1Desc;
-            document.getElementById('sec2Title').innerText = data.sec2Title;
-            document.getElementById('sec2Desc').innerText = data.sec2Desc;
-            document.getElementById('sec3Title').innerText = data.sec3Title;
-            document.getElementById('sec3Desc').innerText = data.sec3Desc;
-
-            document.getElementById('mTitle').innerText = data.mTitle;
-            document.getElementById('mSub').innerText = data.mSub;
-            document.getElementById('mLabel1').innerText = data.mLabel1;
-            document.getElementById('mLabel2').innerText = data.mLabel2;
-            document.getElementById('mLabel3').innerText = data.mLabel3;
-            document.getElementById('mLabel4').innerText = data.mLabel4;
-            document.getElementById('mLabel5').innerText = data.mLabel5;
-            document.getElementById('mBtnSubmit').innerText = data.mBtnSubmit;
-            document.getElementById('mBtnCancel').innerText = data.mBtnCancel;
-
-            document.getElementById('footerRights').innerText = data.footerRights;
-            document.getElementById('footerReg').innerText = data.footerReg;
-
             runCalculator();
-        }
+        }}
 
-        function runCalculator() {
+        function runCalculator() {{
             const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
             const cat = document.getElementById('calcCategory').value;
             let fee = (amount * 2.5) / 100;
             
-            if(cat === 'car_deposit') {
-                fee = (amount * 1.0) / 100;
-                if(fee > 50) fee = 50;
-            } else if(cat === 'goods') {
-                fee = (amount * 1.0) / 100;
-            }
+            if(cat === 'car_deposit' || cat === 'goods') {{
+                fee = (amount * 1.5) / 100;
+            }}
 
             const total = amount + fee;
             const cur = i18n[currentLang].curr;
@@ -872,13 +1110,29 @@ def serve_home():
             document.getElementById('calcNet').innerText = amount.toLocaleString() + cur;
             document.getElementById('calcFee').innerText = fee.toLocaleString() + cur;
             document.getElementById('calcTotal').innerText = total.toLocaleString() + cur;
-        }
+        }}
 
-        function openModal() { document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').classList.add('flex'); }
-        function openModalWithValues() { document.getElementById('newPrice').value = document.getElementById('calcAmount').value; openModal(); }
-        function closeModal() { document.getElementById('createModal').classList.add('hidden'); document.getElementById('createModal').classList.remove('flex'); }
+        function openModal() {{ document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').classList.add('flex'); }}
+        function openModalWithValues() {{ document.getElementById('newPrice').value = document.getElementById('calcAmount').value; openModal(); }}
+        function closeModal() {{ document.getElementById('createModal').classList.add('hidden'); document.getElementById('createModal').classList.remove('flex'); }}
+        
+        function openListingModal() {{ document.getElementById('listingModal').classList.remove('hidden'); document.getElementById('listingModal').classList.add('flex'); }}
+        function closeListingModal() {{ document.getElementById('listingModal').classList.add('hidden'); document.getElementById('listingModal').classList.remove('flex'); }}
 
-        async function submitDeal() {
+        function openAuthModal() {{ document.getElementById('authModal').classList.remove('hidden'); document.getElementById('authModal').classList.add('flex'); }}
+        function closeAuthModal() {{ document.getElementById('authModal').classList.add('hidden'); document.getElementById('authModal').classList.remove('flex'); }}
+
+        function simulateNafath() {{
+            const id = document.getElementById('nafathId').value.trim();
+            if(id.length < 10) {{ alert('يرجى إدخال رقم هوية صحيح مكون من 10 أرقام'); return; }}
+            alert('تم إرسال طلب التحقق إلى تطبيق نفاذ (Face ID) برمز تأكيد: ' + Math.floor(10 + Math.random() * 90));
+            closeAuthModal();
+            document.getElementById('nafathBtn').innerHTML = '<span>✅</span> <span>موثق بنفاذ</span>';
+            document.getElementById('nafathBtn').classList.remove('text-amber-400', 'border-amber-500/30', 'bg-amber-500/10');
+            document.getElementById('nafathBtn').classList.add('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
+        }}
+
+        async function submitDeal() {{
             const title = document.getElementById('newTitle').value;
             const categoryElem = document.getElementById('newCategory');
             const category = categoryElem.options[categoryElem.selectedIndex].text;
@@ -886,21 +1140,52 @@ def serve_home():
             const seller_name = document.getElementById('newSeller').value;
             const buyer_name = document.getElementById('newBuyer').value;
 
-            if(!title || !price || !seller_name) {
+            if(!title || !price || !seller_name) {{
                 alert(currentLang === 'ar' ? 'يرجى تعبئة الحقول الأساسية' : 'Please fill required fields');
                 return;
-            }
+            }}
 
-            const res = await fetch('/api/deals/create', {
+            const res = await fetch('/api/deals/create', {{
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({title, category, price, seller_name, buyer_name})
-            });
+                headers: {{'Content-Type': 'application/json'}},
+                body: JSON.stringify({{title, category, price, seller_name, buyer_name}})
+            }});
             const data = await res.json();
-            if(data.status === 'success') {
+            if(data.status === 'success') {{
                 window.location.href = '/deal/' + data.deal_id;
-            }
-        }
+            }}
+        }}
+
+        async function submitListing() {{
+            const title = document.getElementById('listTitle').value;
+            const price = parseFloat(document.getElementById('listPrice').value);
+            const country = document.getElementById('listCountry').value;
+            const category = document.getElementById('listCategory').value;
+            const media_url = document.getElementById('listMedia').value;
+            const seller = document.getElementById('listSeller').value;
+
+            if(!title || !price || !seller) {{
+                alert('يرجى تعبئة الحقول الأساسية');
+                return;
+            }}
+
+            const res = await fetch('/api/listings/create', {{
+                method: 'POST',
+                headers: {{'Content-Type': 'application/json'}},
+                body: JSON.stringify({{title, price, category, country, seller, media_url}})
+            }});
+            if(res.ok) {{
+                alert('تم نشر إعلانك بنجاح في حراج وثيق!');
+                location.reload();
+            }}
+        }}
+
+        function buyFromMarket(title, category, price, seller) {{
+            document.getElementById('newTitle').value = 'شراء إعلان: ' + title;
+            document.getElementById('newPrice').value = price;
+            document.getElementById('newSeller').value = seller;
+            openModal();
+        }}
 
         runCalculator();
     </script>
@@ -938,17 +1223,18 @@ def serve_deal_room(deal_id: str):
         <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-center relative shadow-2xl">
             <div class="w-14 h-14 rounded-2xl bg-white/10 mx-auto flex items-center justify-center text-2xl mb-4">💳</div>
             <h3 class="text-xl font-bold text-white mb-2">إيداع الضمان المالي في خزينة وثيق</h3>
-            <p class="text-xs text-slate-400 mb-6">المبلغ يُحجز مشفراً ولا يُحول للبائع إلا بعد فحصك وموافقتك التامة.</p>
+            <p class="text-xs text-slate-400 mb-6">المبلغ يُحجز مشفراً شاملاً عمولة الوساطة، ولا يُحول للبائع إلا بعد فحصك وموافقتك التامة.</p>
             
             <div class="bg-black/60 border border-white/10 p-4 rounded-2xl mb-6 text-right space-y-2 text-sm font-mono">
-                <div class="flex justify-between text-slate-400"><span>المبلغ الإجمالي:</span><span class="text-emerald-400 font-bold text-base">{deal['total_paid']:,} ريال</span></div>
-                <div class="flex justify-between text-xs text-slate-500"><span>شامل رسوم الضمان ({deal['fee_percent']}%):</span><span>{deal['fee_amount']} ريال</span></div>
+                <div class="flex justify-between text-slate-400"><span>المبلغ الأساسي للسلعة:</span><span class="text-white font-bold">{deal['price']:,} ريال</span></div>
+                <div class="flex justify-between text-xs text-slate-400"><span>عمولة الضمان والوساطة ({deal['fee_percent']}%):</span><span class="text-amber-400 font-bold">{deal['fee_amount']} ريال</span></div>
+                <div class="flex justify-between border-t border-white/10 pt-2 text-base"><span>الإجمالي المطلوب سداده:</span><span class="text-emerald-400 font-black">{deal['total_paid']:,} ريال</span></div>
             </div>
 
-            <!-- خيارات الدفع الفورية -->
             <div class="space-y-3">
                 <button onclick="executePayment('Apple Pay ')" class="w-full btn-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2">
-                    <span class="text-lg">Pay</span> <span>الدفع السريع بـ Apple Pay</span>
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.78-8.08-12.28-15-6.3-9.76-11.38-20.91-15.24-33.45-3.86-12.54-5.79-24.3-5.79-35.28 0-14.28 3.57-26.15 10.72-35.61 7.15-9.46 16.29-14.32 27.42-14.58 4.8.12 10.33 1.34 16.59 3.66 6.26 2.32 10.02 3.54 11.28 3.66 2.01-.33 6.07-1.74 12.18-4.23 6.11-2.49 11.66-3.62 16.65-3.39 12.77 1.07 22.84 5.98 30.21 14.74-11.13 6.75-16.58 16.03-16.36 27.84.22 9.25 3.86 16.99 10.92 23.23 7.06 6.24 15.42 9.77 25.08 10.6-2.12 6.53-4.78 13.06-7.98 19.59zM119.22 33.64c0-7.39 2.65-14.35 7.95-20.88 5.3-6.53 11.83-10.72 19.59-12.57.8 7.39-1.63 14.36-7.29 20.91-5.66 6.55-12.41 10.73-20.25 12.54z"/></svg>
+                    <span>الدفع وحجز الضمان بـ Apple Pay</span>
                 </button>
                 <button onclick="executePayment('بطاقة مدى Mada')" class="w-full btn-glass font-medium py-3.5 rounded-2xl flex items-center justify-center gap-2">
                     <span>💳</span> <span>الدفع ببطاقة مدى / فيزا</span>
@@ -974,13 +1260,12 @@ def serve_deal_room(deal_id: str):
     <!-- شريط حالة الصفقة والمؤقت -->
     <div class="bg-white/[0.02] border-b border-white/5 py-2 px-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2 font-mono">
         <span>⏱️ مؤقت الاسترجاع التلقائي:</span>
-        <span id="countdownTimer" class="text-white font-bold">{'09:59' if not is_pending else 'بانتظار الإيداع'}</span>
+        <span id="countdownTimer" class="text-white font-bold">{'09:59' if not is_pending else 'بانتظار سداد المشتري للضمان'}</span>
         <span>(تسترجع الأموال فورياً في حال عدم التسليم)</span>
     </div>
 
     <main class="max-w-6xl mx-auto px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
         
-        <!-- تفاصيل الصفقة والتحكم -->
         <div class="lg:col-span-1 space-y-6">
             <div class="card-dark p-6 rounded-3xl">
                 <div class="flex justify-between items-center mb-4">
@@ -990,9 +1275,9 @@ def serve_deal_room(deal_id: str):
                 <h2 class="text-lg font-bold text-white mb-4">{deal['title']}</h2>
                 
                 <div class="border-t border-white/10 pt-4 space-y-2 text-xs font-mono">
-                    <div class="flex justify-between text-slate-400"><span>مبلغ الصفقة:</span><span class="text-white font-bold">{deal['price']:,} ريال</span></div>
-                    <div class="flex justify-between text-slate-400"><span>عمولة الضمان:</span><span class="text-slate-300">{deal['fee_amount']} ريال</span></div>
-                    <div class="flex justify-between text-slate-400 border-t border-white/10 pt-2 text-sm"><span>الإجمالي المجمّد:</span><span class="text-emerald-400 font-bold">{deal['total_paid']:,} ريال</span></div>
+                    <div class="flex justify-between text-slate-400"><span>مبلغ الصفقة الأساسي:</span><span class="text-white font-bold">{deal['price']:,} ريال</span></div>
+                    <div class="flex justify-between text-slate-400"><span>عمولة الوساطة المحسومة:</span><span class="text-slate-300">{deal['fee_amount']} ريال</span></div>
+                    <div class="flex justify-between text-slate-400 border-t border-white/10 pt-2 text-sm"><span>الإجمالي المجمّد بالخزينة:</span><span class="text-emerald-400 font-bold">{deal['total_paid']:,} ريال</span></div>
                 </div>
 
                 <div class="border-t border-white/10 mt-4 pt-4 text-xs space-y-2 text-slate-400">
@@ -1001,11 +1286,10 @@ def serve_deal_room(deal_id: str):
                 </div>
             </div>
 
-            <!-- أزرار الإجراءات والدفع -->
             <div class="card-dark p-6 rounded-3xl space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 mb-2">إجراءات الأمان</h4>
                 
-                {'<button onclick="openPaymentModal()" class="w-full btn-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 mb-2"><span class="text-lg">Pay</span> <span>إيداع وتجميد المبلغ</span></button>' if is_pending else '<button onclick="confirmRelease()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl transition">✅ تأكيد الفحص والاستلام (تحويل للبائع)</button>'}
+                {'<button onclick="openPaymentModal()" class="w-full btn-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 mb-2"><svg class="w-5 h-5 fill-current" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.78-8.08-12.28-15-6.3-9.76-11.38-20.91-15.24-33.45-3.86-12.54-5.79-24.3-5.79-35.28 0-14.28 3.57-26.15 10.72-35.61 7.15-9.46 16.29-14.32 27.42-14.58 4.8.12 10.33 1.34 16.59 3.66 6.26 2.32 10.02 3.54 11.28 3.66 2.01-.33 6.07-1.74 12.18-4.23 6.11-2.49 11.66-3.62 16.65-3.39 12.77 1.07 22.84 5.98 30.21 14.74-11.13 6.75-16.58 16.03-16.36 27.84.22 9.25 3.86 16.99 10.92 23.23 7.06 6.24 15.42 9.77 25.08 10.6-2.12 6.53-4.78 13.06-7.98 19.59zM119.22 33.64c0-7.39 2.65-14.35 7.95-20.88 5.3-6.53 11.83-10.72 19.59-12.57.8 7.39-1.63 14.36-7.29 20.91-5.66 6.55-12.41 10.73-20.25 12.54z"/></svg> <span>إيداع وتجميد المبلغ والعمولة</span></button>' if is_pending else '<button onclick="confirmRelease()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl transition">✅ تأكيد الفحص والاستلام (تحويل للبائع)</button>'}
                 
                 <button onclick="raiseDispute()" class="w-full bg-rose-500/10 border border-rose-500/30 text-rose-400 font-medium py-2.5 rounded-2xl transition text-xs">⚠️ رفع نزاع وتجميد فوري للوسيط</button>
                 <button onclick="triggerRefund()" class="w-full btn-glass text-slate-300 py-2.5 rounded-2xl transition text-xs">↩️ طلب استرجاع فوري</button>
@@ -1013,7 +1297,6 @@ def serve_deal_room(deal_id: str):
             </div>
         </div>
 
-        <!-- غرفة المحادثة المباشرة والإثباتات -->
         <div class="lg:col-span-2 card-dark rounded-3xl flex flex-col h-[620px] overflow-hidden">
             <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/40">
                 <div class="flex items-center gap-2">
@@ -1023,12 +1306,10 @@ def serve_deal_room(deal_id: str):
                 <span class="text-[11px] text-slate-500 font-mono">🔒 مشفرة ومحمية</span>
             </div>
 
-            <!-- الرسائل -->
             <div id="chatBox" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs">
                 {''.join([f'<div class="p-3 rounded-2xl {"bg-white/5 border border-white/10 text-slate-200" if "النظام" in m["sender"] or "الدفع" in m["sender"] else "bg-black/60 text-slate-300 border border-white/5"}"><div class="flex justify-between text-[10px] text-slate-500 mb-1"><span>{m["sender"]}</span><span>{m["time"]}</span></div><p class="leading-relaxed">{m["text"]}</p></div>' for m in deal['messages']])}
             </div>
 
-            <!-- إرسال رسالة -->
             <div class="p-4 border-t border-white/10 bg-black/40 flex gap-2">
                 <input id="chatInput" type="text" placeholder="اكتب بيانات التسليم أو الاستفسار هنا..." class="flex-1 bg-black/60 border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white focus:border-white/40 outline-none" onkeydown="if(event.key==='Enter') sendMessage()">
                 <button onclick="sendMessage()" class="btn-white font-bold px-6 py-2.5 rounded-2xl text-xs">إرسال</button>
@@ -1063,7 +1344,7 @@ def serve_deal_room(deal_id: str):
                 body: JSON.stringify({{payment_method: method}})
             }});
             if(res.ok) {{
-                alert('✅ تم إيداع وتجميد المبلغ في خزينة وثيق بنجاح عبر ' + method);
+                alert('✅ تم إيداع وتجميد إجمالي المبلغ والعمولة في خزينة وثيق بنجاح عبر ' + method);
                 location.reload();
             }}
         }}
@@ -1074,7 +1355,7 @@ def serve_deal_room(deal_id: str):
         }}
 
         async function confirmRelease() {{
-            if(!confirm('هل تأكدت من استلام السلعة/الخدمة وفحصها 100%؟ سيتم تحويل المبلغ للبائع فوراً.')) return;
+            if(!confirm('هل تأكدت من استلام السلعة/الخدمة وفحصها 100%؟ سيتم تحويل صافي المبلغ للبائع فوراً بعد خصم العمولة.')) return;
             const res = await fetch('/api/deals/' + dealId + '/release', {{method: 'POST'}});
             if(res.ok) location.reload();
         }}
