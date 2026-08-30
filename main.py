@@ -418,149 +418,171 @@ def serve_verify_page():
 </body>
 </html>"""
 
+# صفحة تسجيل الدخول الجديدة المطابقة تماماً لصور بينانس/منصات الأمان
 @app.get("/login", response_class=HTMLResponse)
 @app.get("/issuer/login", response_class=HTMLResponse)
 def serve_login():
     return """<!DOCTYPE html>
-<html lang="en" dir="ltr" id="loginHtml">
+<html lang="ar" dir="rtl" id="loginHtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watheeq | Sign In</title>
+    <title>تسجيل الدخول | وثيق Watheeq</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffffff%22><path d=%22M4.5 12.75l6 6 9-13.5%22 stroke=%22%23ffffff%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', 'Tajawal', sans-serif; background-color: #030303; color: #ffffff; }
-        .input-dark {
-            background-color: #0b0b0e;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        body { font-family: 'Tajawal', sans-serif; background-color: #0b0e11; color: #eaecef; }
+        .auth-card {
+            background-color: #181a20;
+            border: 1px solid #23272f;
+        }
+        .yellow-btn {
+            background-color: #fcd535;
+            color: #181a20;
+            transition: background 0.2s;
+        }
+        .yellow-btn:hover {
+            background-color: #f0b90b;
+        }
+        .input-box {
+            background-color: #0b0e11;
+            border: 1px solid #23272f;
             color: #ffffff;
-            transition: all 0.2s;
         }
-        .input-dark:focus {
-            border-color: rgba(255, 255, 255, 0.3);
+        .input-box:focus {
+            border-color: #f0b90b;
             outline: none;
-        }
-        .card-dark {
-            background: rgba(14, 14, 18, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.06);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-white selection:text-black">
+<body class="min-h-screen flex flex-col justify-between selection:bg-yellow-400 selection:text-black">
 
     <header class="px-8 py-6 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3">
-            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <svg class="w-7 h-7 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
             </svg>
-            <span class="text-xl font-bold tracking-tight text-white uppercase">Watheeq</span>
+            <span class="text-xl font-black tracking-tight text-white uppercase">Watheeq</span>
         </a>
-
-        <div class="flex items-center gap-6 text-xs font-medium text-slate-400">
-            <button onclick="toggleLoginLang()" class="hover:text-white transition font-mono border border-white/10 px-3 py-1.5 rounded-full" id="lLangBtn">EN / AR</button>
-            <a href="/" class="hover:text-white transition" id="lHomeLink">Home</a>
-            <a href="/verify" class="hover:text-white transition" id="lVerifyLink">Verify</a>
+        <div class="flex items-center gap-6 text-xs text-slate-400 font-medium">
+            <button onclick="toggleLang()" class="border border-slate-700 px-3 py-1.5 rounded-full text-slate-200" id="langText">English</button>
+            <a href="/" class="hover:text-yellow-400 transition">الرئيسية</a>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 py-12 flex-1 grid grid-cols-1 md:grid-cols-2 gap-16 items-center w-full">
-        <div class="max-w-md w-full">
-            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight" id="lHeading">Issuer Login</h1>
-            <p class="text-xs text-slate-400 mb-8" id="lSubHeading">Sign in to your issuer dashboard</p>
-
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2" id="lEmailLabel">Email</label>
-                    <input type="text" id="loginEmail" value="tuwaiq@tuwaiq.sa" class="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="name@domain.com">
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-xs font-medium text-slate-400" id="lPassLabel">Password</label>
-                        <button type="button" onclick="forgotPassword()" class="text-[11px] text-slate-400 hover:text-white transition underline" id="lForgot">Forgot password?</button>
-                    </div>
-                    <input type="password" id="loginPass" value="••••••••" class="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="••••••••">
-                </div>
-
-                <button type="submit" class="w-full bg-white hover:bg-slate-200 text-black font-semibold text-sm py-3.5 rounded-xl transition duration-200 mt-2" id="lSubmitBtn">
-                    Continue
-                </button>
-            </form>
-
-            <p class="text-xs text-slate-500 text-center mt-8">
-                <span id="lNoAcc">Don't have an account?</span> <a href="/" class="text-white hover:underline" id="lContact">Contact us</a>
-            </p>
-        </div>
-
-        <div class="hidden md:flex flex-col items-center justify-center text-center p-8">
-            <div class="flex gap-4 mb-8">
-                <div class="card-dark p-4 rounded-2xl w-40 text-left border border-white/10 shadow-2xl">
-                    <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs mb-3 text-emerald-400">✓</div>
-                    <div class="h-2 w-16 bg-white/20 rounded mb-1.5"></div>
-                    <div class="h-1.5 w-10 bg-white/10 rounded"></div>
-                </div>
-                <div class="card-dark p-4 rounded-2xl w-40 text-left border border-white/10 shadow-2xl">
-                    <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs mb-3 text-slate-300">🔒</div>
-                    <div class="h-2 w-16 bg-white/20 rounded mb-1.5"></div>
-                    <div class="h-1.5 w-10 bg-white/10 rounded"></div>
-                </div>
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <div class="auth-card p-8 md:p-10 rounded-3xl max-w-md w-full shadow-2xl relative">
+            
+            <!-- Logo Icon -->
+            <div class="flex items-center justify-center gap-2 mb-6">
+                <svg class="w-8 h-8 text-yellow-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
             </div>
 
-            <h3 class="text-xl font-bold text-white mb-2 tracking-tight" id="lSecTitle">Enterprise Security</h3>
-            <p class="text-xs text-slate-400 max-w-sm leading-relaxed" id="lSecDesc">
-                Bank-grade encryption and immutable blockchain records ensure your documents remain tamper-proof forever.
-            </p>
+            <!-- Dynamic Header Step 1, 2, 3 -->
+            <div id="stepHeader" class="text-center mb-8">
+                <h1 id="stepTitle" class="text-2xl font-black text-white mb-2">تسجيل الدخول</h1>
+                <p id="stepSub" class="text-xs text-slate-400">البريد الإلكتروني / رقم الهوية</p>
+            </div>
+
+            <!-- Form Container -->
+            <div id="formContainer" class="space-y-4">
+                
+                <!-- Step 1: Email/ID -->
+                <div id="boxStep1" class="space-y-4">
+                    <div>
+                        <input id="inputEmail" type="text" placeholder="name@domain.com أو رقم الهوية" class="w-full input-box rounded-xl p-3.5 text-sm">
+                    </div>
+                    <button onclick="goToStep2()" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm">متابعة</button>
+                    
+                    <div class="pt-4 border-t border-slate-800 space-y-3">
+                        <button onclick="alert('Google Auth')" class="w-full input-box hover:bg-slate-800 py-3 rounded-xl text-xs flex items-center justify-center gap-2 font-medium">🌐 المتابعة باستخدام Google</button>
+                        <button onclick="alert('Apple Auth')" class="w-full input-box hover:bg-slate-800 py-3 rounded-xl text-xs flex items-center justify-center gap-2 font-medium">🍏 المتابعة باستخدام Apple</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Password -->
+                <div id="boxStep2" class="space-y-4 hidden">
+                    <p id="displayEmailUser" class="text-xs text-slate-400 text-center font-mono mb-2"></p>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">كلمة المرور</label>
+                        <input id="inputPassword" type="password" placeholder="••••••••" class="w-full input-box rounded-xl p-3.5 text-sm">
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <button onclick="alert('تم إرسال رابط استعادة كلمة المرور عبر الإيميل')" class="text-yellow-400 hover:underline">هل نسيت كلمة المرور؟</button>
+                        <button onclick="backToStep1()" class="text-slate-400 hover:text-white">تغيير الحساب</button>
+                    </div>
+                    <button onclick="goToStep3()" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm mt-2">تسجيل الدخول</button>
+                </div>
+
+                <!-- Step 3: OTP Code (6 digits) -->
+                <div id="boxStep3" class="space-y-4 hidden text-center">
+                    <p class="text-xs text-slate-400">أدخل رمز التحقق المكون من 6 أرقام تم إرساله إلى بريدك</p>
+                    <div class="flex justify-center gap-2 py-3">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-lg font-bold input-box rounded-xl">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-lg font-bold input-box rounded-xl">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-lg font-bold input-box rounded-xl">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-lg font-bold input-box rounded-xl">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-lg font-bold input-box rounded-xl">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center text-lg font-bold input-box rounded-xl">
+                    </div>
+                    <button onclick="finalizeLogin()" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm">تأكيد وتحقق</button>
+                </div>
+
+            </div>
+
+            <div class="mt-8 text-center text-xs text-slate-500 space-y-2">
+                <a href="/" class="text-yellow-400 block hover:underline">إنشاء حساب وثيق جديد</a>
+                <a href="/" class="block hover:text-slate-300">ألا يمكنك تسجيل الدخول؟</a>
+            </div>
+
         </div>
     </main>
 
-    <footer class="px-8 py-6 text-center text-xs text-slate-600 border-t border-white/5 font-mono">
-        IMMUTABLE RECORD • BANK-GRADE ESCROW • SAFEWATHEEQ.COM
+    <footer class="px-8 py-6 text-center text-xs text-slate-600 font-mono border-t border-slate-900">
+        WATHEEQ SECURE GATEWAY • SAFEWATHEEQ.COM
     </footer>
 
     <script>
-        let isEn = true;
-        function forgotPassword() {
-            const email = prompt(isEn ? 'Enter your registered email or National ID to reset password:' : 'أدخل بريدك الإلكتروني أو هويتك المسجلة لاستعادة كلمة المرور:');
-            if(email) {
-                alert(isEn ? 'A password reset link with OTP has been dispatched to: ' + email : 'تم إرسال رابط ورمز التحقق لاستعادة كلمة المرور إلى: ' + email);
-            }
-        }
-        function toggleLoginLang() {
-            isEn = !isEn;
-            const html = document.getElementById('loginHtml');
-            html.setAttribute('dir', isEn ? 'ltr' : 'rtl');
-            html.setAttribute('lang', isEn ? 'en' : 'ar');
-            document.getElementById('lLangBtn').innerText = isEn ? 'EN / AR' : 'AR / EN';
+        let currentLang = 'ar';
+        let savedUser = '';
 
-            if(!isEn) {
-                document.getElementById('lHomeLink').innerText = 'الرئيسية';
-                document.getElementById('lVerifyLink').innerText = 'فحص الوثائق';
-                document.getElementById('lHeading').innerText = 'تسجيل الدخول';
-                document.getElementById('lSubHeading').innerText = 'الدخول إلى لوحة إدارة الصفقات والضمان المالي';
-                document.getElementById('lEmailLabel').innerText = 'البريد الإلكتروني / الهوية الوطنية';
-                document.getElementById('lPassLabel').innerText = 'كلمة المرور';
-                document.getElementById('lForgot').innerText = 'نسيت كلمة المرور؟';
-                document.getElementById('lSubmitBtn').innerText = 'متابعة الدخول';
-                document.getElementById('lNoAcc').innerText = 'ليس لديك حساب؟';
-                document.getElementById('lContact').innerText = 'تواصل معنا';
-            } else {
-                document.getElementById('lHomeLink').innerText = 'Home';
-                document.getElementById('lVerifyLink').innerText = 'Verify';
-                document.getElementById('lHeading').innerText = 'Issuer Login';
-                document.getElementById('lSubHeading').innerText = 'Sign in to your issuer dashboard';
-                document.getElementById('lEmailLabel').innerText = 'Email';
-                document.getElementById('lPassLabel').innerText = 'Password';
-                document.getElementById('lForgot').innerText = 'Forgot password?';
-                document.getElementById('lSubmitBtn').innerText = 'Continue';
-                document.getElementById('lNoAcc').innerText = "Don't have an account?";
-                document.getElementById('lContact').innerText = 'Contact us';
-            }
+        function toggleLang() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            document.getElementById('langText').innerText = (currentLang === 'ar') ? 'English' : 'العربية';
+            document.getElementById('loginHtml').setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            document.getElementById('loginHtml').setAttribute('lang', currentLang);
         }
-        function handleLogin(e) {
-            e.preventDefault();
-            alert(isEn ? 'Logged in successfully! Redirecting...' : 'تم تسجيل الدخول بنجاح! جاري التحويل...');
+
+        function goToStep2() {
+            const email = document.getElementById('inputEmail').value.trim();
+            if(!email) { alert('يرجى إدخال البريد الإلكتروني أو الهوية'); return; }
+            savedUser = email;
+            document.getElementById('displayEmailUser').innerText = email;
+            document.getElementById('boxStep1').classList.add('hidden');
+            document.getElementById('boxStep2').classList.remove('hidden');
+            document.getElementById('stepTitle').innerText = 'أدخل كلمة المرور';
+            document.getElementById('stepSub').innerText = email;
+        }
+
+        function backToStep1() {
+            document.getElementById('boxStep2').classList.add('hidden');
+            document.getElementById('boxStep1').classList.remove('hidden');
+            document.getElementById('stepTitle').innerText = 'تسجيل الدخول';
+            document.getElementById('stepSub').innerText = 'البريد الإلكتروني / رقم الهوية';
+        }
+
+        function goToStep3() {
+            const pass = document.getElementById('inputPassword').value.trim();
+            if(!pass) { alert('يرجى إدخال كلمة المرور'); return; }
+            document.getElementById('boxStep2').classList.add('hidden');
+            document.getElementById('boxStep3').classList.remove('hidden');
+            document.getElementById('stepTitle').innerText = 'التحقق الأمني الثنائي';
+            document.getElementById('stepSub').innerText = 'أدخل رمز التحقق المرسل';
+        }
+
+        function finalizeLogin() {
+            alert('✅ تم التحقق وتسجيل الدخول بنجاح! جاري تحويلك لغرفة الصفقات...');
             window.location.href = '/deal/WTQ-701';
         }
     </script>
