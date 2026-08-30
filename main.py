@@ -9,14 +9,12 @@ import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# مكتبات حماية معدل الطلبات (Rate Limiting)
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 app = FastAPI(title="وثيق | Watheeq - Escrow & Marketplace Platform")
 
-# إعداد حماية عدد الطلبات لمنع هجمات Brute Force والهجمات الآلية
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -29,7 +27,6 @@ def get_db():
             conn = psycopg2.connect(DATABASE_URL)
             return conn
         except Exception as e:
-            # تسجيل الخطأ في السجلات خلف الكواليس وعدم إظهاره للمستخدم لتعزيز الأمان
             print("DB Connection Error (Logged securely)")
             return None
     return None
@@ -52,18 +49,6 @@ def init_db():
                     status VARCHAR(100),
                     status_note TEXT,
                     messages JSONB DEFAULT '[]'::jsonb
-                );
-            """)
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS listings (
-                    id SERIAL PRIMARY KEY,
-                    title VARCHAR(255),
-                    price NUMERIC,
-                    category VARCHAR(100),
-                    country VARCHAR(100),
-                    seller VARCHAR(100),
-                    media_url TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
             cur.execute("""
@@ -101,10 +86,9 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    # تفعيل سياسة أمان المحتوى (CSP) لحماية إضافية ضد حقن الأكواد
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; "
-        "img-src 'self' https: data:; "
+        "img-src 'self' https: data: blob:; "
         "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;"
     )
     return response
@@ -128,36 +112,6 @@ memory_deals = {
         ]
     }
 }
-
-memory_listings = [
-    {
-        "id": 1,
-        "title": "نيسان باترول بلاتينيوم 2023 - فل كامل",
-        "price": 245000,
-        "category": "مركبات وعرابين",
-        "country": "🇸🇦 السعودية - الرياض",
-        "seller": "أبو فهد (موثق نفاذ ✅)",
-        "media_url": "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&auto=format&fit=crop&q=80"
-    },
-    {
-        "id": 2,
-        "title": "حساب كود MW3 & BO6 نادر (أوريون ولفلات ماكس)",
-        "price": 1400,
-        "category": "أصول رقمية وحسابات",
-        "country": "🇸🇦 السعودية - المدينة",
-        "seller": "مرعب_COD (موثق ✅)",
-        "media_url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80"
-    },
-    {
-        "id": 3,
-        "title": "ساعة رولكس صبمارينر أصلية مع الصندوق والضمان",
-        "price": 42000,
-        "category": "سلع عامة وإلكترونيات",
-        "country": "🇦🇪 الإمارات - دبي",
-        "seller": "الماس الخليج (موثق ✅)",
-        "media_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80"
-    }
-]
 
 def fetch_deal(deal_id: str):
     conn = get_db()
@@ -204,14 +158,6 @@ class CreateDealRequest(BaseModel):
     seller_name: str = Field(..., max_length=50)
     buyer_name: str = Field(default="", max_length=50)
 
-class ListingRequest(BaseModel):
-    title: str
-    price: float
-    category: str
-    country: str
-    seller: str
-    media_url: str
-
 class MessageRequest(BaseModel):
     sender: str
     text: str
@@ -257,21 +203,6 @@ def create_deal(request: Request, req: CreateDealRequest):
     save_deal(deal)
     return {"status": "success", "deal_id": deal_id, "deal": deal}
 
-@app.post("/api/listings/create")
-@limiter.limit("10/minute")
-def create_listing(request: Request, req: ListingRequest):
-    item = {
-        "id": len(memory_listings) + 1,
-        "title": html.escape(req.title),
-        "price": req.price,
-        "category": html.escape(req.category),
-        "country": html.escape(req.country),
-        "seller": html.escape(req.seller) + " (موثق ✅)",
-        "media_url": req.media_url if req.media_url else "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80"
-    }
-    memory_listings.insert(0, item)
-    return {"status": "success", "listing": item}
-
 @app.post("/api/deals/{deal_id}/pay")
 @limiter.limit("15/minute")
 def pay_deal(request: Request, deal_id: str, req: PaymentConfirmRequest):
@@ -295,35 +226,18 @@ def release_funds(deal_id: str):
     save_deal(deal)
     return deal
 
-@app.post("/api/deals/{deal_id}/refund")
-def auto_refund_deal(deal_id: str):
-    deal = fetch_deal(deal_id)
-    if not deal:
-        raise HTTPException(status_code=404, detail="الصفقة غير موجودة")
-    deal["status"] = "تم الاسترجاع التلقائي للمشتري ↩️"
-    deal["status_note"] = "تم استرجاع كامل المبلغ لحساب المشتري البنكي فورياً وتلقائياً لعدم تسليم السلعة."
-    deal["messages"].append({"sender": "نظام الحماية التلقائي", "text": "↩️ تم تفعيل الاسترجاع التلقائي وإعادة كامل المبلغ للمشتري لحمايته من التأخير.", "time": "الآن"})
-    save_deal(deal)
-    return deal
-
-@app.post("/api/deals/{deal_id}/dispute")
-def dispute_deal(deal_id: str):
-    deal = fetch_deal(deal_id)
-    if not deal:
-        raise HTTPException(status_code=404, detail="الصفقة غير موجودة")
-    deal["status"] = "تم إيقاف الصفقة (نزاع تحت مراجعة الإدارة) ⚠️"
-    deal["status_note"] = "تم رفع اعتراض وتجميد المستحقات والعمولة تحت مراجعة فريق التحكيم المالي."
-    deal["messages"].append({"sender": "إدارة الرقابة والتحكيم", "text": "⚠️ تم تجميد الصفقة بناءً على طلب أحد الأطراف. يجري تدقيق السجلات من الوسيط.", "time": "الآن"})
-    save_deal(deal)
-    return deal
-
 @app.post("/api/deals/{deal_id}/chat")
 @limiter.limit("30/minute")
 def send_chat(request: Request, deal_id: str, req: MessageRequest):
     deal = fetch_deal(deal_id)
     if not deal:
         raise HTTPException(status_code=404, detail="الصفقة غير موجودة")
-    msg = {"sender": html.escape(req.sender), "text": html.escape(req.text), "time": "الآن"}
+    
+    text = req.text
+    if any(k in text for k in ["http://", "https://", "snapchat", "whatsapp", "واتساب", "سناب", "05"]):
+        text = "⚠️ [تنبيه أمان وثيق]: تم حجب محتوى التواصل الخارجي لضمان سلامة الضمان المالي."
+
+    msg = {"sender": html.escape(req.sender), "text": html.escape(text), "time": "الآن"}
     deal["messages"].append(msg)
     save_deal(deal)
     return {"status": "success", "messages": deal["messages"]}
@@ -331,223 +245,128 @@ def send_chat(request: Request, deal_id: str, req: MessageRequest):
 @app.get("/verify", response_class=HTMLResponse)
 def serve_verify_page():
     return """<!DOCTYPE html>
-<html lang="en" dir="ltr" id="verifyHtml">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watheeq | Verify Document</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffffff%22><path d=%22M4.5 12.75l6 6 9-13.5%22 stroke=%22%23ffffff%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', 'Tajawal', sans-serif; background-color: #030303; color: #ffffff; }
-        .card-dark { background: rgba(14, 14, 18, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .pill-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #94a3b8; }
-        .pill-btn.active { background: #ffffff; color: #000000; font-weight: 700; }
-    </style>
+    <style>body { background-color: #030303; color: #ffffff; font-family: sans-serif; }</style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-white selection:text-black">
-    <header class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between w-full">
-        <a href="/" class="flex items-center gap-3">
-            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-            <span class="text-xl font-bold tracking-tight text-white uppercase">Watheeq</span>
-        </a>
-        <div class="flex items-center gap-6 text-xs font-medium text-slate-400">
-            <a href="/" class="hover:text-white transition">Product</a>
-            <a href="/#security" class="hover:text-white transition">Security</a>
-            <a href="/#market" class="hover:text-white transition">Contact</a>
-            <a href="/verify" class="text-white">Verify</a>
-            <a href="/login" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-slate-200 transition">Sign In</a>
-        </div>
-    </header>
-    <main class="flex-1 flex flex-col items-center justify-center text-center px-6 py-12">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-emerald-400 text-xs font-mono mb-8">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>LIVE VERIFICATION</span>
-        </div>
-        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-3">Verify Document.</h1>
-        <p class="text-xs md:text-sm text-slate-400 mb-8 max-w-md">Enter a document ID or scan a QR code to verify authenticity</p>
-        <div class="flex items-center gap-3 mb-8">
-            <button onclick="switchMode('scan')" id="btnScan" class="pill-btn active px-6 py-2.5 rounded-full text-xs flex items-center gap-2"><span>📷</span> <span>Start QR Scan</span></button>
-            <button onclick="switchMode('id')" id="btnId" class="pill-btn px-6 py-2.5 rounded-full text-xs flex items-center gap-2"><span>📝</span> <span>Enter Public ID</span></button>
-        </div>
-        <div id="scanBox" class="card-dark rounded-3xl p-8 max-w-sm w-full flex flex-col items-center justify-center text-center mb-4 min-h-[220px]">
-            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center text-2xl mb-4">⚠️</div>
-            <p class="text-xs font-bold text-white mb-1">Unable to start camera. Please check permissions.</p>
-            <p class="text-[11px] text-slate-500 mb-4">Or use manual ID search below</p>
-            <button onclick="alert('Camera access requested')" class="bg-white text-black font-bold text-xs px-5 py-2 rounded-full">Retry Camera Access</button>
-        </div>
-        <div id="idBox" class="card-dark rounded-3xl p-6 max-w-sm w-full hidden mb-4 text-right">
-            <label class="text-xs text-slate-400 block mb-2">Deal / Document ID:</label>
-            <input id="publicDealId" type="text" placeholder="e.g. WTQ-701" class="w-full bg-black border border-white/10 rounded-xl p-3 text-white text-center font-mono uppercase text-sm mb-3 outline-none">
-            <button onclick="lookupDeal()" class="w-full bg-white text-black font-bold text-xs py-2.5 rounded-xl">Inspect Vault Record</button>
-        </div>
-        <p class="text-xs text-slate-500 mb-10 font-mono">Or scan QR code</p>
-        <div class="flex items-center gap-6 text-xs text-slate-500 font-mono">
-            <span>🛡️ Bank-grade Security</span>
-            <span>⚡ Instant Results</span>
-            <span>⚖️ Zero Knowledge</span>
-        </div>
-    </main>
-    <footer class="border-t border-white/5 py-8 max-w-7xl mx-auto px-6 w-full flex justify-between items-center text-xs text-slate-600">
-        <span class="text-white font-bold uppercase">Watheeq</span>
-        <div class="flex gap-8"><span>Product</span><span>Resources</span><span>Legal</span></div>
-    </footer>
-    <script>
-        function switchMode(m) {
-            if(m === 'scan') {
-                document.getElementById('btnScan').classList.add('active');
-                document.getElementById('btnId').classList.remove('active');
-                document.getElementById('scanBox').classList.remove('hidden');
-                document.getElementById('idBox').classList.add('hidden');
-            } else {
-                document.getElementById('btnId').classList.add('active');
-                document.getElementById('btnScan').classList.remove('active');
-                document.getElementById('scanBox').classList.add('hidden');
-                document.getElementById('idBox').classList.remove('hidden');
-            }
-        }
-        function lookupDeal() {
-            const id = document.getElementById('publicDealId').value.trim();
-            if(id) window.location.href = '/deal/' + id;
-        }
-    </script>
+<body class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+    <h1 class="text-3xl font-bold mb-4">Verify Watheeq Vault Record</h1>
+    <input id="did" type="text" placeholder="WTQ-701" class="bg-black border border-white/20 p-3 rounded-xl text-center text-white font-mono mb-4 w-64">
+    <button onclick="location.href='/deal/'+document.getElementById('did').value" class="bg-white text-black font-bold px-6 py-2.5 rounded-xl text-xs">Inspect Record</button>
 </body>
 </html>"""
 
 @app.get("/login", response_class=HTMLResponse)
-@app.get("/issuer/login", response_class=HTMLResponse)
 def serve_login():
     return """<!DOCTYPE html>
-<html lang="ar" dir="rtl" id="loginHtml">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول | وثيق Watheeq</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffffff%22><path d=%22M4.5 12.75l6 6 9-13.5%22 stroke=%22%23ffffff%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
+    <title>تسجيل الدخول | وثيق</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Tajawal', sans-serif; background-color: #0b0e11; color: #eaecef; }
-        .auth-card { background-color: #181a20; border: 1px solid #23272f; }
-        .yellow-btn { background-color: #fcd535; color: #181a20; transition: background 0.2s; }
-        .yellow-btn:hover { background-color: #f0b90b; }
-        .input-box { background-color: #0b0e11; border: 1px solid #23272f; color: #ffffff; }
-        .input-box:focus { border-color: #f0b90b; outline: none; }
-    </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-yellow-400 selection:text-black">
-    <header class="px-8 py-6 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-3">
-            <svg class="w-7 h-7 text-yellow-400" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-            <span class="text-xl font-black tracking-tight text-white uppercase">Watheeq</span>
-        </a>
-        <div class="flex items-center gap-6 text-xs text-slate-400 font-medium">
-            <button onclick="toggleLang()" class="border border-slate-700 px-3 py-1.5 rounded-full text-slate-200" id="langText">English</button>
-            <a href="/" class="hover:text-yellow-400 transition">الرئيسية</a>
-        </div>
-    </header>
-    <main class="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div class="auth-card p-8 md:p-10 rounded-3xl max-w-md w-full shadow-2xl relative">
-            <div id="stepHeader" class="text-center mb-8">
-                <h1 id="stepTitle" class="text-2xl font-black text-white mb-2">تسجيل الدخول</h1>
-                <p id="stepSub" class="text-xs text-slate-400">البريد الإلكتروني / رقم الهوية</p>
-            </div>
-            <div id="formContainer" class="space-y-4">
-                <div id="boxStep1" class="space-y-4">
-                    <input id="inputEmail" type="text" placeholder="name@domain.com أو رقم الهوية" class="w-full input-box rounded-xl p-3.5 text-sm">
-                    <button onclick="goToStep2()" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm">متابعة</button>
-                </div>
-                <div id="boxStep2" class="space-y-4 hidden">
-                    <p id="displayEmailUser" class="text-xs text-slate-400 text-center font-mono mb-2"></p>
-                    <input id="inputPassword" type="password" placeholder="••••••••" class="w-full input-box rounded-xl p-3.5 text-sm">
-                    <button onclick="goToStep3()" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm mt-2">تسجيل الدخول</button>
-                </div>
-                <div id="boxStep3" class="space-y-4 hidden text-center">
-                    <p class="text-xs text-slate-400">أدخل رمز التحقق المكون من 6 أرقام</p>
-                    <button onclick="finalizeLogin()" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm">تأكيد وتحقق</button>
-                </div>
-            </div>
-        </div>
-    </main>
-    <script>
-        function goToStep2() {
-            const email = document.getElementById('inputEmail').value.trim();
-            if(!email) { alert('يرجى إدخال البريد الإلكتروني أو الهوية'); return; }
-            document.getElementById('boxStep1').classList.add('hidden');
-            document.getElementById('boxStep2').classList.remove('hidden');
-        }
-        function goToStep3() {
-            document.getElementById('boxStep2').classList.add('hidden');
-            document.getElementById('boxStep3').classList.remove('hidden');
-        }
-        function finalizeLogin() {
-            alert('✅ تم التحقق وتسجيل الدخول بنجاح!');
-            window.location.href = '/deal/WTQ-701';
-        }
-    </script>
+<body class="min-h-screen bg-[#0b0e11] text-[#eaecef] flex items-center justify-center p-4">
+    <div class="bg-[#181a20] border border-[#23272f] p-8 rounded-3xl max-w-md w-full text-center">
+        <h1 class="text-2xl font-black text-white mb-4">تسجيل الدخول الآمن</h1>
+        <input type="text" placeholder="البريد أو رقم الهوية" class="w-full bg-[#0b0e11] border border-[#23272f] rounded-xl p-3 text-white mb-4 text-sm">
+        <button onclick="location.href='/deal/WTQ-701'" class="w-full bg-[#fcd535] text-black font-bold py-3 rounded-xl text-sm">متابعة الغرفة التجريبية</button>
+    </div>
 </body>
 </html>"""
 
 @app.get("/", response_class=HTMLResponse)
 def serve_home():
-    listings_cards = ""
-    for item in memory_listings:
-        listings_cards += f"""
-        <div class="card-dark rounded-2xl overflow-hidden border border-white/10 flex flex-col justify-between group hover:border-white/30 transition">
-            <div class="relative h-48 w-full bg-slate-900 overflow-hidden">
-                <img src="{item['media_url']}" alt="{item['title']}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                <span class="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-md text-[11px] font-mono text-white border border-white/10">{item['country']}</span>
-            </div>
-            <div class="p-5 flex-1 flex flex-col justify-between text-right">
-                <div>
-                    <h4 class="text-base font-bold text-white mb-2 line-clamp-1">{item['title']}</h4>
-                    <p class="text-xs text-slate-400 mb-4">👤 المعلن: {item['seller']}</p>
-                </div>
-                <div class="border-t border-white/10 pt-4 flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] text-slate-500 block">السعر المطلوب</span>
-                        <span class="text-lg font-black text-emerald-400 font-mono">{item['price']:,} ريال</span>
-                    </div>
-                    <button onclick="buyFromMarket('{item['title']}', '{item['category']}', {item['price']}, '{item['seller']}')" class="btn-white text-xs font-bold px-4 py-2 rounded-xl">شراء بضمان وثيق 🛡️</button>
-                </div>
-            </div>
-        </div>
-        """
-    return f"""<!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlTag">
+    return """<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>وثيق | Watheeq - Escrow & Marketplace</title>
+    <title>وثيق | Watheeq - الوساطة والضمان المالي المعتمد</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body {{ font-family: 'Tajawal', 'Inter', sans-serif; background-color: #030303; color: #ffffff; }}
-        .card-dark {{ background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); }}
-        .btn-white {{ background: #ffffff; color: #000000; transition: all 0.2s ease; }}
-        .btn-white:hover {{ background: #e2e8f0; transform: scale(1.02); }}
+        body { font-family: 'Tajawal', sans-serif; background-color: #030303; color: #ffffff; }
+        .card-dark { background: rgba(14, 14, 18, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); }
+        .btn-white { background: #ffffff; color: #000000; transition: all 0.2s; }
+        .btn-white:hover { background: #e2e8f0; transform: scale(1.02); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between relative selection:bg-white selection:text-black">
-    <header class="border-b border-white/5 bg-black/60 backdrop-blur-md sticky top-0 z-50">
+<body class="min-h-screen flex flex-col justify-between">
+    <div class="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6 text-center text-xs font-semibold text-amber-300">
+        🛡️ حماية الوساطة الإلزامية: تجميد الأموال بالخزينة يضمن حقوق البائع والمشتري بنسبة 100%.
+    </div>
+
+    <!-- نافذة إنشاء صفقة -->
+    <div id="createModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
+            <h3 class="text-xl font-black text-white mb-1">إنشاء غرفة وساطة جديدة</h3>
+            <div class="space-y-4 mt-4">
+                <input id="newTitle" type="text" placeholder="عنوان الصفقة (مثال: عربون سيارة / حساب)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm">
+                <select id="newCategory" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm">
+                    <option>الأصول الرقمية والألعاب (2.5%)</option>
+                    <option>مركبات وعرابين (1.5%)</option>
+                </select>
+                <input id="newPrice" type="number" placeholder="المبلغ (ريال)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm">
+                <input id="newSeller" type="text" placeholder="يوزر البائع" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm">
+                <input id="newBuyer" type="text" placeholder="يوزر المشتري" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm">
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button onclick="submitDeal()" class="flex-1 btn-white text-xs font-black py-3 rounded-xl">إنشاء الغرفة الآمنة 🔒</button>
+                <button onclick="document.getElementById('createModal').classList.add('hidden')" class="px-5 py-3 bg-white/5 text-xs rounded-xl">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة تحكم البنك وأرباح المنصة -->
+    <div id="bankModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-right">
+            <h3 class="text-xl font-black text-white mb-2">🏦 ربط الحساب البنكي واستلام الأرباح</h3>
+            <p class="text-xs text-slate-400 mb-6">اربط حسابك التجاري أو الآيبان (IBAN) لتحويل عمولات المنصة تلقائياً فور إتمام كل صفقة.</p>
+            <div class="space-y-3 mb-6">
+                <input type="text" placeholder="اسم صاحب الحساب التجاري" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
+                <input type="text" placeholder="SA03 8000 ... (رقم الآيبان IBAN)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs font-mono">
+            </div>
+            <button onclick="alert('✅ تم ربط الحساب البنكي بنجاح! سيتم تحويل عوائد العمولات فورياً.'); document.getElementById('bankModal').classList.add('hidden')" class="w-full btn-white py-3 rounded-xl font-bold text-xs">حفظ وربط الحساب البنكي 💳</button>
+            <button onclick="document.getElementById('bankModal').classList.add('hidden')" class="w-full pt-3 text-slate-500 text-xs">إغلاق</button>
+        </div>
+    </div>
+
+    <header class="border-b border-white/5 bg-black/60 backdrop-blur sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-3">
-                <span class="text-lg font-black tracking-tight text-white uppercase">Watheeq</span>
-            </a>
+            <span class="text-lg font-black tracking-tight text-white uppercase">Watheeq</span>
             <div class="flex items-center gap-3">
-                <a href="/verify" class="text-slate-300 px-3 py-1.5 text-xs font-semibold">Verify</a>
-                <a href="/login" class="text-slate-300 px-3 py-1.5 text-xs font-semibold">Sign In</a>
-                <button onclick="openModal()" class="btn-white text-xs font-black px-4 py-2 rounded-full">+ إنشاء صفقة</button>
+                <button onclick="document.getElementById('bankModal').classList.remove('hidden'); document.getElementById('bankModal').classList.add('flex');" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs px-3.5 py-1.5 rounded-full font-bold">💳 ربط الحساب البنكي للعمولات</button>
+                <button onclick="document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').classList.add('flex');" class="btn-white text-xs font-black px-4 py-2 rounded-full">+ إنشاء صفقة</button>
             </div>
         </div>
     </header>
-    <main class="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 relative z-10">
-        <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">The immutable standard.</h1>
+
+    <main class="flex-1 flex flex-col items-center justify-center text-center px-6 py-20">
+        <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-6">The immutable standard of escrow.</h1>
+        <p class="text-slate-400 text-sm max-w-xl mb-8">المنصة الآمنة لتجميد أموال العربون والصفقات ومنع النصب المالي تماماً.</p>
+        <button onclick="location.href='/deal/WTQ-701'" class="btn-white text-sm font-bold px-8 py-3.5 rounded-full">معاينة الغرفة التجريبية النشطة 🛡️</button>
     </main>
-    <section class="max-w-6xl mx-auto px-6 py-16 w-full">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">{listings_cards}</div>
-    </section>
+
+    <footer class="border-t border-white/5 py-6 bg-black text-center text-xs text-slate-500 font-mono">
+        © 2026 WATHEEQ ESCROW & MARKETPLACE
+    </footer>
+
+    <script>
+        async function submitDeal() {
+            const title = document.getElementById('newTitle').value;
+            const category = document.getElementById('newCategory').value;
+            const price = parseFloat(document.getElementById('newPrice').value);
+            const seller_name = document.getElementById('newSeller').value;
+            const buyer_name = document.getElementById('newBuyer').value;
+            if(!title || !price) { alert('أدخل الحقول المطلوبة'); return; }
+            const res = await fetch('/api/deals/create', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title, category, price, seller_name, buyer_name})});
+            const data = await res.json();
+            if(data.status === 'success') location.href = '/deal/' + data.deal_id;
+        }
+    </script>
 </body>
 </html>"""
 
@@ -555,19 +374,101 @@ def serve_home():
 def serve_deal_room(deal_id: str):
     deal = fetch_deal(deal_id)
     if not deal:
-        return HTMLResponse("<h1>عذراً، الصفقة غير موجودة أو انتهت صلاحيتها.</h1>", status_code=404)
+        return HTMLResponse("<h1>عذراً، الغرفة غير موجودة.</h1>", status_code=404)
     is_pending = ("بانتظار" in deal['status'])
     return f"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>غرفة الضمان {deal['id']} | وثيق</title>
+    <title>غرفة الضمان المالي {deal['id']} | وثيق</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body {{ font-family: sans-serif; background-color: #050507; color: #ffffff; }}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>body {{ font-family: 'Tajawal', sans-serif; background-color: #050507; color: #ffffff; }} .card-dark {{ background: rgba(14, 14, 18, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); }}</style>
 </head>
-<body class="p-8">
-    <h1 class="text-2xl font-bold mb-4">غرفة الصفقة: {deal['id']}</h1>
-    <p>العنوان: {deal['title']}</p>
-    <p>الحالة: {deal['status']}</p>
+<body class="min-h-screen flex flex-col justify-between p-6">
+    <div id="payModal" class="fixed inset-0 bg-black/90 z-50 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-center shadow-2xl">
+            <h3 class="text-xl font-bold text-white mb-2">إيداع الضمان المالي بالخزينة</h3>
+            <p class="text-xs text-slate-400 mb-6 font-mono">الإجمالي شاملاً العمولة: <span class="text-emerald-400 font-bold">{deal['total_paid']:,} ريال</span></p>
+            <div class="space-y-3">
+                <button onclick="pay('Apple Pay ')" class="w-full bg-white text-black font-bold py-3.5 rounded-2xl text-xs">الدفع عبر Apple Pay</button>
+                <button onclick="pay('بطاقة مدى Mada')" class="w-full bg-white/5 border border-white/10 text-white font-medium py-3.5 rounded-2xl text-xs">الدفع عبر بطاقة مدى</button>
+                <button onclick="document.getElementById('payModal').classList.add('hidden')" class="text-xs text-slate-500 pt-2">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="max-w-6xl mx-auto w-full flex justify-between items-center py-4 border-b border-white/10 mb-6">
+        <a href="/" class="text-lg font-black">Watheeq Vault [{deal['id']}]</a>
+        <span class="text-xs text-emerald-400 font-mono">🛡️ شات آمن ومراقب</span>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+        <div class="card-dark p-6 rounded-3xl space-y-4">
+            <span class="text-xs px-2.5 py-1 rounded-full bg-white/5 text-slate-300">{deal['category']}</span>
+            <h2 class="text-base font-bold text-white">{deal['title']}</h2>
+            <div class="border-t border-white/10 pt-4 space-y-2 text-xs font-mono">
+                <div class="flex justify-between text-slate-400"><span>المبلغ:</span><span class="text-white font-bold">{deal['price']:,} ريال</span></div>
+                <div class="flex justify-between text-slate-400"><span>عمولة المنصة:</span><span class="text-slate-300">{deal['fee_amount']} ريال</span></div>
+                <div class="flex justify-between text-emerald-400 border-t border-white/10 pt-2 text-sm font-bold"><span>المجموع:</span><span>{deal['total_paid']:,} ريال</span></div>
+            </div>
+            <div class="pt-4">
+                {'<button onclick="document.getElementById(\'payModal\').classList.remove(\'hidden\'); document.getElementById(\'payModal\').classList.add(\'flex\');" class="w-full bg-white text-black font-bold py-3 rounded-2xl text-xs">إيداع وتجميد المبلغ بالخزينة 🔒</button>' if is_pending else '<button onclick="release()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-2xl text-xs">تأكيد الاستلام وتحويل للبائع ✅</button>'}
+            </div>
+        </div>
+
+        <div class="md:col-span-2 card-dark rounded-3xl flex flex-col h-[540px] overflow-hidden">
+            <div class="p-4 border-b border-white/10 bg-black/40 text-xs font-bold text-slate-300">سجل الشات (يدعم إرسال صور ومقاطع فحص المنتج)</div>
+            <div class="flex-1 p-4 overflow-y-auto space-y-3 text-xs" id="chatContainer">
+                {''.join([f'<div class="p-3 rounded-2xl bg-black/60 border border-white/5 text-slate-300"><div class="flex justify-between text-[10px] text-slate-500 mb-1"><span>{m["sender"]}</span><span>{m["time"]}</span></div><p>{m["text"]}</p></div>' for m in deal['messages']])}
+            </div>
+            
+            <!-- شريط الكتابة ورفع الصور والفيديو -->
+            <div class="p-3 border-t border-white/10 bg-black/40 flex items-center gap-2">
+                <label class="cursor-pointer bg-white/10 hover:bg-white/20 text-white px-3 py-2.5 rounded-2xl text-xs flex items-center gap-1 transition" title="رفع صورة أو فيديو">
+                    <span>📷 تصوير/رفع</span>
+                    <input type="file" id="mediaFile" accept="image/*,video/*" class="hidden" onchange="handleMediaUpload(this)">
+                </label>
+                <input id="txt" type="text" placeholder="اكتب رسالة أو تفاصيل الفحص..." class="flex-1 bg-black/60 border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white outline-none" onkeydown="if(event.key==='Enter') sendText()">
+                <button onclick="sendText()" class="bg-white text-black font-bold px-5 py-2.5 rounded-2xl text-xs">إرسال</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const dealId = "{deal['id']}";
+        async function pay(m) {
+            const res = await fetch('/api/deals/'+dealId+'/pay', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({payment_method:m})});
+            if(res.ok) location.reload();
+        }
+        async function release() {
+            if(!confirm('هل أنت متأكد من استلام السلعة؟')) return;
+            const res = await fetch('/api/deals/'+dealId+'/release', {method:'POST'});
+            if(res.ok) location.reload();
+        }
+        async function sendText() {
+            const i = document.getElementById('txt');
+            if(!i.value.trim()) return;
+            await postMsg('المستخدم', i.value);
+            i.value='';
+        }
+        async function handleMediaUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const htmlContent = file.type.startsWith('image') 
+                        ? `<img src="${e.target.result}" class="max-w-xs rounded-xl mt-2 border border-white/10">` 
+                        : `<video src="${e.target.result}" controls class="max-w-xs rounded-xl mt-2 border border-white/10"></video>`;
+                    await postMsg('المستخدم (صورة/فيديو مرفق)', htmlContent);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        async function postMsg(sender, text) {
+            const res = await fetch('/api/deals/'+dealId+'/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({sender, text})});
+            if(res.ok) location.reload();
+        }
+    </script>
 </body>
 </html>"""
