@@ -316,6 +316,7 @@ def serve_verify_page():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watheeq | Verify Document</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffffff%22><path d=%22M4.5 12.75l6 6 9-13.5%22 stroke=%22%23ffffff%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -339,7 +340,6 @@ def serve_verify_page():
             <a href="/" class="hover:text-white transition">Product</a>
             <a href="/#security" class="hover:text-white transition">Security</a>
             <a href="/#market" class="hover:text-white transition">Contact</a>
-            <button onclick="toggleVerifyLang()" class="border border-white/10 px-3 py-1.5 rounded-full text-slate-300 font-mono" id="vLangBtn">us English ⌄</button>
             <a href="/verify" class="text-white">Verify</a>
             <a href="/login" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-slate-200 transition">Sign In</a>
         </div>
@@ -351,8 +351,8 @@ def serve_verify_page():
             <span>LIVE VERIFICATION</span>
         </div>
 
-        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-3" id="vHead">Verify Document.</h1>
-        <p class="text-xs md:text-sm text-slate-400 mb-8 max-w-md" id="vSubHead">Enter a document ID or scan a QR code to verify authenticity</p>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-3">Verify Document.</h1>
+        <p class="text-xs md:text-sm text-slate-400 mb-8 max-w-md">Enter a document ID or scan a QR code to verify authenticity</p>
 
         <div class="flex items-center gap-3 mb-8">
             <button onclick="switchMode('scan')" id="btnScan" class="pill-btn active px-6 py-2.5 rounded-full text-xs flex items-center gap-2">
@@ -363,7 +363,6 @@ def serve_verify_page():
             </button>
         </div>
 
-        <!-- Camera Box -->
         <div id="scanBox" class="card-dark rounded-3xl p-8 max-w-sm w-full flex flex-col items-center justify-center text-center mb-4 min-h-[220px]">
             <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center text-2xl mb-4">⚠️</div>
             <p class="text-xs font-bold text-white mb-1">Unable to start camera. Please check permissions.</p>
@@ -371,7 +370,6 @@ def serve_verify_page():
             <button onclick="alert('Camera access requested')" class="bg-white text-black font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-200">Retry Camera Access</button>
         </div>
 
-        <!-- Manual ID Search -->
         <div id="idBox" class="card-dark rounded-3xl p-6 max-w-sm w-full hidden mb-4 text-right">
             <label class="text-xs text-slate-400 block mb-2">Deal / Document ID:</label>
             <input id="publicDealId" type="text" placeholder="e.g. WTQ-701" class="w-full bg-black border border-white/10 rounded-xl p-3 text-white text-center font-mono uppercase text-sm mb-3 outline-none focus:border-white/30">
@@ -416,14 +414,10 @@ def serve_verify_page():
             const id = document.getElementById('publicDealId').value.trim();
             if(id) window.location.href = '/deal/' + id;
         }
-        function toggleVerifyLang() {
-            alert('Switching Language to Arabic / English');
-        }
     </script>
 </body>
 </html>"""
 
-# صفحة تسجيل الدخول Login مع Forgot Password
 @app.get("/login", response_class=HTMLResponse)
 @app.get("/issuer/login", response_class=HTMLResponse)
 def serve_login():
@@ -433,6 +427,7 @@ def serve_login():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watheeq | Sign In</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffffff%22><path d=%22M4.5 12.75l6 6 9-13.5%22 stroke=%22%23ffffff%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -526,14 +521,12 @@ def serve_login():
 
     <script>
         let isEn = true;
-
         function forgotPassword() {
             const email = prompt(isEn ? 'Enter your registered email or National ID to reset password:' : 'أدخل بريدك الإلكتروني أو هويتك المسجلة لاستعادة كلمة المرور:');
             if(email) {
                 alert(isEn ? 'A password reset link with OTP has been dispatched to: ' + email : 'تم إرسال رابط ورمز التحقق لاستعادة كلمة المرور إلى: ' + email);
             }
         }
-
         function toggleLoginLang() {
             isEn = !isEn;
             const html = document.getElementById('loginHtml');
@@ -552,8 +545,6 @@ def serve_login():
                 document.getElementById('lSubmitBtn').innerText = 'متابعة الدخول';
                 document.getElementById('lNoAcc').innerText = 'ليس لديك حساب؟';
                 document.getElementById('lContact').innerText = 'تواصل معنا';
-                document.getElementById('lSecTitle').innerText = 'Enterprise Security';
-                document.getElementById('lSecDesc').innerText = 'تشفير بنكي وسجلات غير قابلة للتعديل لضمان بقاء العرابين والصفقات محمية للأبد.';
             } else {
                 document.getElementById('lHomeLink').innerText = 'Home';
                 document.getElementById('lVerifyLink').innerText = 'Verify';
@@ -565,8 +556,6 @@ def serve_login():
                 document.getElementById('lSubmitBtn').innerText = 'Continue';
                 document.getElementById('lNoAcc').innerText = "Don't have an account?";
                 document.getElementById('lContact').innerText = 'Contact us';
-                document.getElementById('lSecTitle').innerText = 'Enterprise Security';
-                document.getElementById('lSecDesc').innerText = 'Bank-grade encryption and immutable blockchain records ensure your documents remain tamper-proof forever.';
             }
         }
         function handleLogin(e) {
@@ -613,6 +602,7 @@ def serve_home():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="siteTitle">وثيق | Watheeq - Escrow & Marketplace</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffffff%22><path d=%22M4.5 12.75l6 6 9-13.5%22 stroke=%22%23ffffff%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -662,13 +652,11 @@ def serve_home():
 
     <div class="light-streak"></div>
 
-    <!-- شريط توضيح آلية الضمان والعمولة المشتركة -->
     <div class="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6 text-center text-xs font-semibold text-amber-300 flex items-center justify-center gap-2">
         <span>🛡️ نظام الضمان الإلزامي:</span>
         <span>لا يمكن دفع أي مستحقات للطرف الآخر خارج المنصة. يتم إيداع وتجميد كامل قيمة السلعة وعمولة الوساطة بنكياً دفعة واحدة لحماية الطرفين.</span>
     </div>
 
-    <!-- نافذة توثيق نفاذ / Face ID -->
     <div id="authModal" class="fixed inset-0 bg-black/90 z-50 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-center relative shadow-2xl">
             <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 mx-auto flex items-center justify-center text-3xl mb-4">🪪</div>
@@ -690,7 +678,6 @@ def serve_home():
         </div>
     </div>
 
-    <!-- Navigation Bar -->
     <header class="border-b border-white/5 bg-black/60 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="/" class="flex items-center gap-3 cursor-pointer">
@@ -734,7 +721,6 @@ def serve_home():
         </div>
     </header>
 
-    <!-- Main Hero Section -->
     <main class="hero-glow flex-1 flex flex-col items-center justify-center text-center px-6 py-20 relative z-10">
         
         <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full pill-badge text-emerald-400 text-xs font-mono tracking-wide mb-8">
@@ -784,7 +770,6 @@ def serve_home():
 
     </main>
 
-    <!-- Marketplace Section -->
     <section id="market" class="max-w-6xl mx-auto px-6 py-16 w-full relative z-10">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <div class="text-right">
@@ -804,7 +789,6 @@ def serve_home():
         </div>
     </section>
 
-    <!-- Calculator Section -->
     <section id="calculator" class="max-w-4xl mx-auto px-6 py-12 w-full relative z-10">
         <div class="card-dark p-8 md:p-10 rounded-3xl">
             <div class="text-center mb-8">
@@ -851,7 +835,6 @@ def serve_home():
         </div>
     </section>
 
-    <!-- Security Protocol Section -->
     <section id="security" class="max-w-6xl mx-auto px-6 py-12 relative z-10">
         <div class="text-center mb-10">
             <h3 class="text-2xl font-black text-white mb-2" id="secHead">ترسانة الحماية ومنع الاحتيال</h3>
@@ -878,7 +861,6 @@ def serve_home():
         </div>
     </section>
 
-    <!-- Modal إنشاء صفقة -->
     <div id="createModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
             <h3 class="text-xl font-black text-white mb-1" id="mTitle">إنشاء رابط صفقة وساطة جديد</h3>
@@ -921,7 +903,6 @@ def serve_home():
         </div>
     </div>
 
-    <!-- Modal إضافة إعلان حراج جديد -->
     <div id="listingModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
             <h3 class="text-xl font-black text-white mb-1">إضافة إعلان جديد في حراج وثيق</h3>
@@ -978,7 +959,6 @@ def serve_home():
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="border-t border-white/5 py-8 bg-black text-center text-xs text-slate-500 relative z-10 space-y-2 font-mono">
         <p id="footerRights">© 2026 WATHEEQ ESCROW & MARKETPLACE | SAFEWATHEEQ.COM</p>
         <p class="text-slate-600" id="footerReg">SECURE ESCROW • MANDATORY FEE LOCK • ANTI-FRAUD</p>
@@ -986,7 +966,6 @@ def serve_home():
 
     <script>
         let currentLang = 'ar';
-
         const i18n = {{
             ar: {{
                 langBtn: '🌐 English',
@@ -994,29 +973,6 @@ def serve_home():
                 navSec: 'بروتوكول الأمان',
                 navLive: 'غرفة حية (WTQ-701)',
                 btnNav: '+ إنشاء صفقة',
-                heroBadge: 'V1.0 IS LIVE & SECURE',
-                heroHeadline: 'The immutable<br><span class="text-slate-400 font-light">standard.</span>',
-                heroSub: 'المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات والإعلانات بأقل عمولة في السوق (تبدأ من 1%). يتم سداد وحجز كامل المبلغ مع العمولة بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.',
-                heroBtn1: 'ابدأ صفقة جديدة ⚡',
-                stat1Label: 'الأصول والحسابات والألعاب',
-                stat1Sub: 'أقل عمولة',
-                stat2Label: 'عربون وفحص السيارات',
-                stat2Sub: 'ضمان فحص',
-                stat3Label: 'مؤقت الاسترجاع التلقائي',
-                stat3Sub: 'حماية فورية',
-                stat4Label: 'بوابات الدفع المشفرة',
-                calcHead: 'حاسبة كسر السوق والعمولات الشفافة',
-                calcSub: 'تحطيم أسعار العمولات التقليدية لضمان أعلى فائدة للبائع والمشتري',
-                lblAmount: 'قيمة الصفقة أو العربون (ريال سعودي):',
-                lblCat: 'مجال الوساطة:',
-                opt1: 'الأصول الرقمية، الحسابات، والألعاب (2.5%)',
-                opt2: 'الخدمات والعمل الحر والبرمجة (2.5%)',
-                opt3: 'عربون حجز وفحص المركبات (1.5%)',
-                opt4: 'الأجهزة الإلكترونية والسلع (1.5%)',
-                resSeller: 'المبلغ الصافي للبائع',
-                resFee: 'عمولة وثيق المحسومة',
-                resTotal: 'الإجمالي الإلزامي للإيداع',
-                calcBtn: 'ابدأ بهذه الحسبة وتجميد المبلغ 🚀',
                 curr: ' ريال'
             }},
             en: {{
@@ -1025,29 +981,6 @@ def serve_home():
                 navSec: 'Security Protocol',
                 navLive: 'Live Deal (WTQ-701)',
                 btnNav: '+ Create Deal',
-                heroBadge: 'V1.0 IS LIVE & SECURE',
-                heroHeadline: 'The immutable<br><span class="text-slate-400 font-light">standard.</span>',
-                heroSub: 'The premier Saudi escrow and marketplace platform. Full funds and escrow fees must be locked via Apple Pay & Mada before any milestone or asset release.',
-                heroBtn1: 'Start Secure Deal ⚡',
-                stat1Label: 'Digital Assets & Gaming',
-                stat1Sub: 'Lowest in Market',
-                stat2Label: 'Car Deposit & Inspection',
-                stat2Sub: 'Inspection Escrow',
-                stat3Label: 'Auto-Refund Timer',
-                stat3Sub: 'Instant Protection',
-                stat4Label: 'Encrypted Payment',
-                calcHead: 'Market Breaker Fee Calculator',
-                calcSub: 'Transparent, ultra-low fees engineered to maximize savings for buyers and sellers',
-                lblAmount: 'Deal / Deposit Amount (SAR):',
-                lblCat: 'Escrow Category:',
-                opt1: 'Digital Assets, Accounts & Gaming (2.5%)',
-                opt2: 'Freelance, Services & Code (2.5%)',
-                opt3: 'Car Inspection Deposit (1.5%)',
-                opt4: 'Electronics & General Goods (1.5%)',
-                resSeller: 'Net to Seller',
-                resFee: 'Watheeq Fee',
-                resTotal: 'Total Deposit Required',
-                calcBtn: 'Start Deal & Lock Escrow 🚀',
                 curr: ' SAR'
             }}
         }};
@@ -1056,42 +989,9 @@ def serve_home():
             currentLang = (currentLang === 'ar') ? 'en' : 'ar';
             const htmlTag = document.getElementById('htmlTag');
             const data = i18n[currentLang];
-
             htmlTag.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
             htmlTag.setAttribute('lang', currentLang);
-
             document.getElementById('langBtn').innerText = data.langBtn;
-            document.getElementById('navCalc').innerText = data.navCalc;
-            document.getElementById('navSec').innerText = data.navSec;
-            document.getElementById('navLive').innerText = data.navLive;
-            document.getElementById('btnNav').innerText = data.btnNav;
-            
-            document.getElementById('heroBadge').innerText = data.heroBadge;
-            document.getElementById('heroHeadline').innerHTML = data.heroHeadline;
-            document.getElementById('heroSub').innerText = data.heroSub;
-            document.getElementById('heroBtn1').innerHTML = data.heroBtn1;
-
-            document.getElementById('stat1Label').innerText = data.stat1Label;
-            document.getElementById('stat1Sub').innerText = data.stat1Sub;
-            document.getElementById('stat2Label').innerText = data.stat2Label;
-            document.getElementById('stat2Sub').innerText = data.stat2Sub;
-            document.getElementById('stat3Label').innerText = data.stat3Label;
-            document.getElementById('stat3Sub').innerText = data.stat3Sub;
-            document.getElementById('stat4Label').innerText = data.stat4Label;
-
-            document.getElementById('calcHead').innerText = data.calcHead;
-            document.getElementById('calcSub').innerText = data.calcSub;
-            document.getElementById('lblAmount').innerText = data.lblAmount;
-            document.getElementById('lblCat').innerText = data.lblCat;
-            document.getElementById('opt1').innerText = data.opt1;
-            document.getElementById('opt2').innerText = data.opt2;
-            document.getElementById('opt3').innerText = data.opt3;
-            document.getElementById('opt4').innerText = data.opt4;
-            document.getElementById('resSeller').innerText = data.resSeller;
-            document.getElementById('resFee').innerText = data.resFee;
-            document.getElementById('resTotal').innerText = data.resTotal;
-            document.getElementById('calcBtn').innerText = data.calcBtn;
-
             runCalculator();
         }}
 
@@ -1099,14 +999,11 @@ def serve_home():
             const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
             const cat = document.getElementById('calcCategory').value;
             let fee = (amount * 2.5) / 100;
-            
             if(cat === 'car_deposit' || cat === 'goods') {{
                 fee = (amount * 1.5) / 100;
             }}
-
             const total = amount + fee;
             const cur = i18n[currentLang].curr;
-
             document.getElementById('calcNet').innerText = amount.toLocaleString() + cur;
             document.getElementById('calcFee').innerText = fee.toLocaleString() + cur;
             document.getElementById('calcTotal').innerText = total.toLocaleString() + cur;
@@ -1115,10 +1012,8 @@ def serve_home():
         function openModal() {{ document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').classList.add('flex'); }}
         function openModalWithValues() {{ document.getElementById('newPrice').value = document.getElementById('calcAmount').value; openModal(); }}
         function closeModal() {{ document.getElementById('createModal').classList.add('hidden'); document.getElementById('createModal').classList.remove('flex'); }}
-        
         function openListingModal() {{ document.getElementById('listingModal').classList.remove('hidden'); document.getElementById('listingModal').classList.add('flex'); }}
         function closeListingModal() {{ document.getElementById('listingModal').classList.add('hidden'); document.getElementById('listingModal').classList.remove('flex'); }}
-
         function openAuthModal() {{ document.getElementById('authModal').classList.remove('hidden'); document.getElementById('authModal').classList.add('flex'); }}
         function closeAuthModal() {{ document.getElementById('authModal').classList.add('hidden'); document.getElementById('authModal').classList.remove('flex'); }}
 
@@ -1139,21 +1034,14 @@ def serve_home():
             const price = parseFloat(document.getElementById('newPrice').value);
             const seller_name = document.getElementById('newSeller').value;
             const buyer_name = document.getElementById('newBuyer').value;
-
-            if(!title || !price || !seller_name) {{
-                alert(currentLang === 'ar' ? 'يرجى تعبئة الحقول الأساسية' : 'Please fill required fields');
-                return;
-            }}
-
+            if(!title || !price || !seller_name) {{ alert('يرجى تعبئة الحقول الأساسية'); return; }}
             const res = await fetch('/api/deals/create', {{
                 method: 'POST',
                 headers: {{'Content-Type': 'application/json'}},
                 body: JSON.stringify({{title, category, price, seller_name, buyer_name}})
             }});
             const data = await res.json();
-            if(data.status === 'success') {{
-                window.location.href = '/deal/' + data.deal_id;
-            }}
+            if(data.status === 'success') {{ window.location.href = '/deal/' + data.deal_id; }}
         }}
 
         async function submitListing() {{
@@ -1163,21 +1051,13 @@ def serve_home():
             const category = document.getElementById('listCategory').value;
             const media_url = document.getElementById('listMedia').value;
             const seller = document.getElementById('listSeller').value;
-
-            if(!title || !price || !seller) {{
-                alert('يرجى تعبئة الحقول الأساسية');
-                return;
-            }}
-
+            if(!title || !price || !seller) {{ alert('يرجى تعبئة الحقول الأساسية'); return; }}
             const res = await fetch('/api/listings/create', {{
                 method: 'POST',
                 headers: {{'Content-Type': 'application/json'}},
                 body: JSON.stringify({{title, price, category, country, seller, media_url}})
             }});
-            if(res.ok) {{
-                alert('تم نشر إعلانك بنجاح في حراج وثيق!');
-                location.reload();
-            }}
+            if(res.ok) {{ alert('تم نشر إعلانك بنجاح في حراج وثيق!'); location.reload(); }}
         }}
 
         function buyFromMarket(title, category, price, seller) {{
@@ -1206,6 +1086,7 @@ def serve_deal_room(deal_id: str):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>غرفة الضمان {deal['id']} | وثيق</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ffffff%22><path d=%22M4.5 12.75l6 6 9-13.5%22 stroke=%22%23ffffff%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -1218,8 +1099,7 @@ def serve_deal_room(deal_id: str):
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-    <!-- نافذة الدفع وحجز المبلغ (Apple Pay / مدى) -->
-    <div id="paymentModal" class="fixed inset-0 bg-black/90 z-50 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div id="paymentModal" class="fixed inset-0 bg-black/90 z-50 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-center relative shadow-2xl">
             <div class="w-14 h-14 rounded-2xl bg-white/10 mx-auto flex items-center justify-center text-2xl mb-4">💳</div>
             <h3 class="text-xl font-bold text-white mb-2">إيداع الضمان المالي في خزينة وثيق</h3>
@@ -1244,7 +1124,6 @@ def serve_deal_room(deal_id: str):
         </div>
     </div>
 
-    <!-- Header -->
     <header class="border-b border-white/5 bg-black/60 backdrop-blur sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="/" class="flex items-center gap-3">
@@ -1257,7 +1136,6 @@ def serve_deal_room(deal_id: str):
         </div>
     </header>
 
-    <!-- شريط حالة الصفقة والمؤقت -->
     <div class="bg-white/[0.02] border-b border-white/5 py-2 px-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2 font-mono">
         <span>⏱️ مؤقت الاسترجاع التلقائي:</span>
         <span id="countdownTimer" class="text-white font-bold">{'09:59' if not is_pending else 'بانتظار سداد المشتري للضمان'}</span>
@@ -1265,7 +1143,6 @@ def serve_deal_room(deal_id: str):
     </div>
 
     <main class="max-w-6xl mx-auto px-6 py-8 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
-        
         <div class="lg:col-span-1 space-y-6">
             <div class="card-dark p-6 rounded-3xl">
                 <div class="flex justify-between items-center mb-4">
@@ -1288,9 +1165,7 @@ def serve_deal_room(deal_id: str):
 
             <div class="card-dark p-6 rounded-3xl space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 mb-2">إجراءات الأمان</h4>
-                
                 {'<button onclick="openPaymentModal()" class="w-full btn-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 mb-2"><svg class="w-5 h-5 fill-current" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.78-8.08-12.28-15-6.3-9.76-11.38-20.91-15.24-33.45-3.86-12.54-5.79-24.3-5.79-35.28 0-14.28 3.57-26.15 10.72-35.61 7.15-9.46 16.29-14.32 27.42-14.58 4.8.12 10.33 1.34 16.59 3.66 6.26 2.32 10.02 3.54 11.28 3.66 2.01-.33 6.07-1.74 12.18-4.23 6.11-2.49 11.66-3.62 16.65-3.39 12.77 1.07 22.84 5.98 30.21 14.74-11.13 6.75-16.58 16.03-16.36 27.84.22 9.25 3.86 16.99 10.92 23.23 7.06 6.24 15.42 9.77 25.08 10.6-2.12 6.53-4.78 13.06-7.98 19.59zM119.22 33.64c0-7.39 2.65-14.35 7.95-20.88 5.3-6.53 11.83-10.72 19.59-12.57.8 7.39-1.63 14.36-7.29 20.91-5.66 6.55-12.41 10.73-20.25 12.54z"/></svg> <span>إيداع وتجميد المبلغ والعمولة</span></button>' if is_pending else '<button onclick="confirmRelease()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-2xl transition">✅ تأكيد الفحص والاستلام (تحويل للبائع)</button>'}
-                
                 <button onclick="raiseDispute()" class="w-full bg-rose-500/10 border border-rose-500/30 text-rose-400 font-medium py-2.5 rounded-2xl transition text-xs">⚠️ رفع نزاع وتجميد فوري للوسيط</button>
                 <button onclick="triggerRefund()" class="w-full btn-glass text-slate-300 py-2.5 rounded-2xl transition text-xs">↩️ طلب استرجاع فوري</button>
                 <button onclick="copyDealLink()" class="w-full btn-glass text-slate-300 py-2.5 rounded-2xl transition text-xs">🔗 نسخ رابط الصفقة للطرف الآخر</button>
@@ -1315,13 +1190,11 @@ def serve_deal_room(deal_id: str):
                 <button onclick="sendMessage()" class="btn-white font-bold px-6 py-2.5 rounded-2xl text-xs">إرسال</button>
             </div>
         </div>
-
     </main>
 
     <script>
         const dealId = "{deal['id']}";
         const isPending = {'true' if is_pending else 'false'};
-
         if(!isPending) {{
             let timeLeft = 600;
             const timerElem = document.getElementById('countdownTimer');
@@ -1333,59 +1206,45 @@ def serve_deal_room(deal_id: str):
                 timerElem.innerText = mins + ':' + secs;
             }}, 1000);
         }}
-
         function openPaymentModal() {{ document.getElementById('paymentModal').classList.remove('hidden'); document.getElementById('paymentModal').classList.add('flex'); }}
         function closePaymentModal() {{ document.getElementById('paymentModal').classList.add('hidden'); document.getElementById('paymentModal').classList.remove('flex'); }}
-
         async function executePayment(method) {{
             const res = await fetch('/api/deals/' + dealId + '/pay', {{
                 method: 'POST',
                 headers: {{'Content-Type': 'application/json'}},
                 body: JSON.stringify({{payment_method: method}})
             }});
-            if(res.ok) {{
-                alert('✅ تم إيداع وتجميد إجمالي المبلغ والعمولة في خزينة وثيق بنجاح عبر ' + method);
-                location.reload();
-            }}
+            if(res.ok) {{ alert('✅ تم إيداع وتجميد إجمالي المبلغ والعمولة في خزينة وثيق بنجاح عبر ' + method); location.reload(); }}
         }}
-
         function copyDealLink() {{
             navigator.clipboard.writeText(window.location.href);
             alert('تم نسخ رابط الصفقة بنجاح!');
         }}
-
         async function confirmRelease() {{
             if(!confirm('هل تأكدت من استلام السلعة/الخدمة وفحصها 100%؟ سيتم تحويل صافي المبلغ للبائع فوراً بعد خصم العمولة.')) return;
             const res = await fetch('/api/deals/' + dealId + '/release', {{method: 'POST'}});
             if(res.ok) location.reload();
         }}
-
         async function raiseDispute() {{
             if(!confirm('هل تريد تجميد الصفقة وتحويلها لمراجعة الوسيط؟')) return;
             const res = await fetch('/api/deals/' + dealId + '/dispute', {{method: 'POST'}});
             if(res.ok) location.reload();
         }}
-
         async function triggerRefund() {{
             if(!confirm('هل انتهت المهلة ولم يتم تسليمك؟ سيتم استرجاع كامل المبلغ لحسابك.')) return;
             const res = await fetch('/api/deals/' + dealId + '/refund', {{method: 'POST'}});
             if(res.ok) location.reload();
         }}
-
         async function sendMessage() {{
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if(!text) return;
-            
             const res = await fetch('/api/deals/' + dealId + '/chat', {{
                 method: 'POST',
                 headers: {{'Content-Type': 'application/json'}},
                 body: JSON.stringify({{sender: 'المستخدم', text: text}})
             }});
-            if(res.ok) {{
-                input.value = '';
-                location.reload();
-            }}
+            if(res.ok) {{ input.value = ''; location.reload(); }}
         }}
     </script>
 </body>
