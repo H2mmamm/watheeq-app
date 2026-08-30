@@ -259,21 +259,112 @@ def serve_verify_page():
 </body>
 </html>"""
 
+# صفحة تسجيل الدخول المحدثة بالكامل مع نظام الترجمة الشامل (عربي / إنجليزي)
 @app.get("/login", response_class=HTMLResponse)
 def serve_login():
     return """<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
-    <title>تسجيل الدخول | وثيق</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">تسجيل الدخول | وثيق Watheeq</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #0b0e11; color: #eaecef; }
+        .auth-card { background-color: #181a20; border: 1px solid #23272f; }
+        .yellow-btn { background-color: #fcd535; color: #181a20; transition: background 0.2s; }
+        .yellow-btn:hover { background-color: #f0b90b; }
+        .input-box { background-color: #0b0e11; border: 1px solid #23272f; color: #ffffff; }
+        .input-box:focus { border-color: #f0b90b; outline: none; }
+    </style>
 </head>
-<body class="min-h-screen bg-[#0b0e11] text-[#eaecef] flex items-center justify-center p-4">
-    <div class="bg-[#181a20] border border-[#23272f] p-8 rounded-3xl max-w-md w-full text-center">
-        <h1 class="text-2xl font-black text-white mb-4">تسجيل الدخول الآمن</h1>
-        <input type="text" placeholder="البريد أو رقم الهوية" class="w-full bg-[#0b0e11] border border-[#23272f] rounded-xl p-3 text-white mb-4 text-sm">
-        <button onclick="location.href='/deal/WTQ-701'" class="w-full bg-[#fcd535] text-black font-bold py-3 rounded-xl text-sm">متابعة الغرفة التجريبية</button>
-    </div>
+<body class="min-h-screen flex flex-col justify-between selection:bg-yellow-400 selection:text-black">
+
+    <header class="px-8 py-6 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+            <svg class="w-7 h-7 text-yellow-400" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            <span class="text-xl font-black tracking-tight text-white uppercase">Watheeq</span>
+        </a>
+        <div class="flex items-center gap-4 text-xs text-slate-400 font-medium">
+            <button onclick="toggleLang()" class="border border-slate-700 px-3.5 py-1.5 rounded-full text-slate-200 hover:border-slate-500 transition" id="langBtnText">English</button>
+            <a href="/" class="hover:text-yellow-400 transition" id="navHome">الرئيسية</a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <div class="auth-card p-8 md:p-10 rounded-3xl max-w-md w-full shadow-2xl relative text-center">
+            <h1 id="txtTitle" class="text-2xl font-black text-white mb-2">تسجيل الدخول</h1>
+            <p id="txtSub" class="text-xs text-slate-400 mb-8">البريد الإلكتروني / رقم الهوية</p>
+            
+            <div class="space-y-4 text-right" id="formDirection">
+                <input id="inputUser" type="text" placeholder="name@domain.com أو رقم الهوية" class="w-full input-box rounded-xl p-3.5 text-sm text-center font-mono">
+                <button onclick="simulateLogin()" id="btnContinue" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm">متابعة</button>
+            </div>
+
+            <div class="mt-8 text-xs text-slate-500 space-y-2">
+                <a href="/" class="text-yellow-400 block hover:underline" id="txtCreate">إنشاء حساب وثيق جديد</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="px-8 py-6 text-center text-xs text-slate-600 font-mono border-t border-slate-900">
+        WATHEEQ SECURE GATEWAY • SAFEWATHEEQ.COM
+    </footer>
+
+    <script>
+        let currentLang = 'ar';
+
+        const translations = {
+            ar: {
+                dir: 'rtl',
+                langBtn: 'English',
+                navHome: 'الرئيسية',
+                title: 'تسجيل الدخول',
+                sub: 'البريد الإلكتروني / رقم الهوية',
+                placeholder: 'name@domain.com أو رقم الهوية',
+                btn: 'متابعة',
+                create: 'إنشاء حساب وثيق جديد',
+                success: '✅ تم تسجيل الدخول والانتقال للغرفة التجريبية بنجاح!'
+            },
+            en: {
+                dir: 'ltr',
+                langBtn: 'العربية',
+                navHome: 'Home',
+                title: 'Sign In',
+                sub: 'Email / National ID',
+                placeholder: 'name@domain.com or ID',
+                btn: 'Continue',
+                create: 'Create a new Watheeq account',
+                success: '✅ Signed in successfully! Redirecting to demo vault...'
+            }
+        };
+
+        function toggleLang() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            const t = translations[currentLang];
+            
+            document.getElementById('htmlRoot').setAttribute('dir', t.dir);
+            document.getElementById('htmlRoot').setAttribute('lang', currentLang);
+            document.getElementById('langBtnText').innerText = t.langBtn;
+            document.getElementById('navHome').innerText = t.navHome;
+            document.getElementById('txtTitle').innerText = t.title;
+            document.getElementById('txtSub').innerText = t.sub;
+            document.getElementById('inputUser').placeholder = t.placeholder;
+            document.getElementById('btnContinue').innerText = t.btn;
+            document.getElementById('txtCreate').innerText = t.create;
+        }
+
+        function simulateLogin() {
+            const val = document.getElementById('inputUser').value.trim();
+            if(!val) { 
+                alert(currentLang === 'ar' ? 'يرجى إدخال البريد أو الهوية' : 'Please enter email or ID'); 
+                return; 
+            }
+            alert(translations[currentLang].success);
+            window.location.href = '/deal/WTQ-701';
+        }
+    </script>
 </body>
 </html>"""
 
@@ -299,7 +390,6 @@ def serve_home():
         🛡️ حماية الوساطة الإلزامية: تجميد الأموال بالخزينة يضمن حقوق البائع والمشتري بنسبة 100%.
     </div>
 
-    <!-- نافذة إنشاء صفقة -->
     <div id="createModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
             <h3 class="text-xl font-black text-white mb-1">إنشاء غرفة وساطة جديدة</h3>
@@ -320,16 +410,15 @@ def serve_home():
         </div>
     </div>
 
-    <!-- لوحة تحكم البنك وأرباح المنصة -->
     <div id="bankModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-right">
             <h3 class="text-xl font-black text-white mb-2">🏦 ربط الحساب البنكي واستلام الأرباح</h3>
-            <p class="text-xs text-slate-400 mb-6">اربط حسابك التجاري أو الآيبان (IBAN) لتحويل عمولات المنصة تلقائياً فور إتمام كل صفقة.</p>
+            <p class="text-xs text-slate-400 mb-6">اربط حسابك التجاري أو الآيبان (IBAN) لتحويل عمولات المنصة تلقائياً.</p>
             <div class="space-y-3 mb-6">
                 <input type="text" placeholder="اسم صاحب الحساب التجاري" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
                 <input type="text" placeholder="SA03 8000 ... (رقم الآيبان IBAN)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs font-mono">
             </div>
-            <button onclick="alert('✅ تم ربط الحساب البنكي بنجاح! سيتم تحويل عوائد العمولات فورياً.'); document.getElementById('bankModal').classList.add('hidden')" class="w-full btn-white py-3 rounded-xl font-bold text-xs">حفظ وربط الحساب البنكي 💳</button>
+            <button onclick="alert('✅ تم ربط الحساب البنكي بنجاح!'); document.getElementById('bankModal').classList.add('hidden')" class="w-full btn-white py-3 rounded-xl font-bold text-xs">حفظ وربط الحساب البنكي 💳</button>
             <button onclick="document.getElementById('bankModal').classList.add('hidden')" class="w-full pt-3 text-slate-500 text-xs">إغلاق</button>
         </div>
     </div>
@@ -338,7 +427,8 @@ def serve_home():
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <span class="text-lg font-black tracking-tight text-white uppercase">Watheeq</span>
             <div class="flex items-center gap-3">
-                <button onclick="document.getElementById('bankModal').classList.remove('hidden'); document.getElementById('bankModal').classList.add('flex');" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs px-3.5 py-1.5 rounded-full font-bold">💳 ربط الحساب البنكي للعمولات</button>
+                <a href="/login" class="bg-white/5 border border-white/10 text-slate-200 text-xs px-3.5 py-1.5 rounded-full font-semibold hover:bg-white/10">Sign In</a>
+                <button onclick="document.getElementById('bankModal').classList.remove('hidden'); document.getElementById('bankModal').classList.add('flex');" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs px-3.5 py-1.5 rounded-full font-bold">💳 ربط الحساب البنكي</button>
                 <button onclick="document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').classList.add('flex');" class="btn-white text-xs font-black px-4 py-2 rounded-full">+ إنشاء صفقة</button>
             </div>
         </div>
@@ -423,7 +513,6 @@ def serve_deal_room(deal_id: str):
                 {''.join([f'<div class="p-3 rounded-2xl bg-black/60 border border-white/5 text-slate-300"><div class="flex justify-between text-[10px] text-slate-500 mb-1"><span>{m["sender"]}</span><span>{m["time"]}</span></div><p>{m["text"]}</p></div>' for m in deal['messages']])}
             </div>
             
-            <!-- شريط الكتابة ورفع الصور والفيديو -->
             <div class="p-3 border-t border-white/10 bg-black/40 flex items-center gap-2">
                 <label class="cursor-pointer bg-white/10 hover:bg-white/20 text-white px-3 py-2.5 rounded-2xl text-xs flex items-center gap-1 transition" title="رفع صورة أو فيديو">
                     <span>📷 تصوير/رفع</span>
