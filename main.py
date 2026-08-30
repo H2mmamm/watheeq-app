@@ -245,6 +245,162 @@ def send_chat(deal_id: str, req: MessageRequest):
     save_deal(deal)
     return {"status": "success", "messages": deal["messages"]}
 
+# صفحة تسجيل الدخول Login
+@app.get("/login", response_class=HTMLResponse)
+@app.get("/issuer/login", response_class=HTMLResponse)
+def serve_login():
+    return """<!DOCTYPE html>
+<html lang="en" dir="ltr" id="loginHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watheeq | Sign In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Tajawal', sans-serif; background-color: #030303; color: #ffffff; }
+        .input-dark {
+            background-color: #0b0b0e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            transition: all 0.2s;
+        }
+        .input-dark:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+        .card-dark {
+            background: rgba(14, 14, 18, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-white selection:text-black">
+
+    <!-- Top Header -->
+    <header class="px-8 py-6 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span class="text-xl font-bold tracking-tight text-white uppercase">Watheeq</span>
+        </a>
+
+        <div class="flex items-center gap-6 text-xs font-medium text-slate-400">
+            <button onclick="toggleLoginLang()" class="hover:text-white transition font-mono border border-white/10 px-3 py-1.5 rounded-full" id="lLangBtn">EN / AR</button>
+            <a href="/" class="hover:text-white transition" id="lHomeLink">Home</a>
+            <a href="/#calculator" class="hover:text-white transition" id="lVerifyLink">Calculator</a>
+        </div>
+    </header>
+
+    <!-- Center Content (Split View) -->
+    <main class="max-w-6xl mx-auto px-6 py-12 flex-1 grid grid-cols-1 md:grid-cols-2 gap-16 items-center w-full">
+        
+        <!-- Left Column: Login Form -->
+        <div class="max-w-md w-full">
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight" id="lHeading">Issuer Login</h1>
+            <p class="text-xs text-slate-400 mb-8" id="lSubHeading">Sign in to your issuer and escrow dashboard</p>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-2" id="lEmailLabel">Email / Identifier</label>
+                    <input type="text" id="loginEmail" value="tuwaiq@tuwaiq.sa" class="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="name@domain.com">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-medium text-slate-400" id="lPassLabel">Password</label>
+                        <a href="#" class="text-[11px] text-slate-500 hover:text-white transition" id="lForgot">Forgot password?</a>
+                    </div>
+                    <input type="password" id="loginPass" value="••••••••" class="w-full input-dark rounded-xl px-4 py-3 text-sm" placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="w-full bg-white hover:bg-slate-200 text-black font-semibold text-sm py-3.5 rounded-xl transition duration-200 mt-2" id="lSubmitBtn">
+                    Continue
+                </button>
+            </form>
+
+            <p class="text-xs text-slate-500 text-center mt-8">
+                <span id="lNoAcc">Don't have an account?</span> <a href="/" class="text-white hover:underline" id="lContact">Create Deal</a>
+            </p>
+        </div>
+
+        <!-- Right Column: Enterprise Security Visual -->
+        <div class="hidden md:flex flex-col items-center justify-center text-center p-8">
+            <div class="flex gap-4 mb-8">
+                <div class="card-dark p-4 rounded-2xl w-40 text-left border border-white/10 shadow-2xl">
+                    <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs mb-3 text-emerald-400">✓</div>
+                    <div class="h-2 w-16 bg-white/20 rounded mb-1.5"></div>
+                    <div class="h-1.5 w-10 bg-white/10 rounded"></div>
+                </div>
+                <div class="card-dark p-4 rounded-2xl w-40 text-left border border-white/10 shadow-2xl">
+                    <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs mb-3 text-slate-300">🔒</div>
+                    <div class="h-2 w-16 bg-white/20 rounded mb-1.5"></div>
+                    <div class="h-1.5 w-10 bg-white/10 rounded"></div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-2 tracking-tight" id="lSecTitle">Enterprise Security</h3>
+            <p class="text-xs text-slate-400 max-w-sm leading-relaxed" id="lSecDesc">
+                Bank-grade encryption and immutable escrow records ensure your deposits and digital transactions remain tamper-proof forever.
+            </p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="px-8 py-6 text-center text-xs text-slate-600 border-t border-white/5 font-mono">
+        IMMUTABLE RECORD • BANK-GRADE ESCROW • SAFEWATHEEQ.COM
+    </footer>
+
+    <script>
+        let isEn = true;
+
+        function toggleLoginLang() {
+            isEn = !isEn;
+            const html = document.getElementById('loginHtml');
+            html.setAttribute('dir', isEn ? 'ltr' : 'rtl');
+            html.setAttribute('lang', isEn ? 'en' : 'ar');
+            document.getElementById('lLangBtn').innerText = isEn ? 'EN / AR' : 'AR / EN';
+
+            if(!isEn) {
+                document.getElementById('lHomeLink').innerText = 'الرئيسية';
+                document.getElementById('lVerifyLink').innerText = 'الحاسبة';
+                document.getElementById('lHeading').innerText = 'تسجيل الدخول';
+                document.getElementById('lSubHeading').innerText = 'الدخول إلى لوحة إدارة الصفقات والضمان المالي';
+                document.getElementById('lEmailLabel').innerText = 'البريد الإلكتروني / الهوية';
+                document.getElementById('lPassLabel').innerText = 'كلمة المرور';
+                document.getElementById('lForgot').innerText = 'نسيت كلمة المرور؟';
+                document.getElementById('lSubmitBtn').innerText = 'متابعة الدخول';
+                document.getElementById('lNoAcc').innerText = 'ليس لديك حساب؟';
+                document.getElementById('lContact').innerText = 'إنشاء صفقة فورية';
+                document.getElementById('lSecTitle').innerText = 'أمان مالي مصرفي مشفر';
+                document.getElementById('lSecDesc').innerText = 'تشفير بنكي وسجلات غير قابلة للتعديل لضمان بقاء العرابين والصفقات محمية للأبد.';
+            } else {
+                document.getElementById('lHomeLink').innerText = 'Home';
+                document.getElementById('lVerifyLink').innerText = 'Calculator';
+                document.getElementById('lHeading').innerText = 'Issuer Login';
+                document.getElementById('lSubHeading').innerText = 'Sign in to your issuer and escrow dashboard';
+                document.getElementById('lEmailLabel').innerText = 'Email / Identifier';
+                document.getElementById('lPassLabel').innerText = 'Password';
+                document.getElementById('lForgot').innerText = 'Forgot password?';
+                document.getElementById('lSubmitBtn').innerText = 'Continue';
+                document.getElementById('lNoAcc').innerText = "Don't have an account?";
+                document.getElementById('lContact').innerText = 'Create Deal';
+                document.getElementById('lSecTitle').innerText = 'Enterprise Security';
+                document.getElementById('lSecDesc').innerText = 'Bank-grade encryption and immutable escrow records ensure your deposits and digital transactions remain tamper-proof forever.';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            alert(isEn ? 'Logged in successfully! Redirecting...' : 'تم تسجيل الدخول بنجاح! جاري التحويل...');
+            window.location.href = '/deal/WTQ-701';
+        }
+    </script>
+</body>
+</html>"""
+
 @app.get("/", response_class=HTMLResponse)
 def serve_home():
     return """<!DOCTYPE html>
@@ -317,13 +473,15 @@ def serve_home():
     <header class="border-b border-white/5 bg-black/60 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <!-- Brand Logo -->
-            <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center font-black text-lg text-white">و</div>
+            <a href="/" class="flex items-center gap-3 cursor-pointer">
+                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
                 <div class="flex flex-col text-right">
                     <span class="text-lg font-black tracking-tight text-white">وثيق</span>
                     <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase font-mono">WATHEEQ</span>
                 </div>
-            </div>
+            </a>
             
             <!-- Nav Links -->
             <nav class="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-400">
@@ -337,9 +495,9 @@ def serve_home():
                 <button onclick="toggleLanguage()" id="langBtn" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition">
                     🌐 English
                 </button>
-                <button onclick="openVerifyModal()" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition flex items-center gap-1.5">
-                    <span id="navVerify">🔍 فحص صفقة</span>
-                </button>
+                <a href="/login" class="pill-badge text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition flex items-center gap-1.5" id="navSignIn">
+                    Sign In
+                </a>
                 <button onclick="openModal()" class="btn-white text-xs font-black px-5 py-2 rounded-full shadow-sm hover:scale-105 transition" id="btnNav">
                     + إنشاء صفقة
                 </button>
@@ -513,19 +671,6 @@ def serve_home():
         </div>
     </div>
 
-    <!-- Verify Modal -->
-    <div id="verifyModal" class="fixed inset-0 bg-black/95 backdrop-blur-lg hidden items-center justify-center p-4 z-50">
-        <div class="card-dark p-8 rounded-3xl max-w-md w-full text-center border border-white/10">
-            <h3 class="text-xl font-bold text-white mb-2" id="vTitle">فحص والتحقق من حالة صفقة</h3>
-            <p class="text-xs text-slate-400 mb-6" id="vSub">أدخل رمز الصفقة للاطلاع على حالة حجز المبلغ والأمان</p>
-            <input id="verifyInput" type="text" placeholder="WTQ-701" class="w-full bg-black/60 border border-white/10 rounded-2xl p-3.5 text-center text-white font-mono text-sm uppercase mb-4 outline-none focus:border-white/40">
-            <div class="flex gap-3">
-                <button onclick="doVerify()" class="flex-1 btn-white text-xs font-bold py-3 rounded-xl" id="vBtn1">التحقق الآن</button>
-                <button onclick="closeVerifyModal()" class="px-5 py-3 btn-glass text-xs rounded-xl" id="vBtn2">إغلاق</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer -->
     <footer class="border-t border-white/5 py-8 bg-black text-center text-xs text-slate-500 relative z-10 space-y-2">
         <p id="footerRights">جميع الحقوق محفوظة © منصة وثيق للوساطة والضمان المالي المشترك | safewatheeq.com</p>
@@ -541,10 +686,10 @@ def serve_home():
                 navCalc: 'حاسبة العمولات',
                 navSec: 'بروتوكول الأمان',
                 navLive: 'غرفة حية (WTQ-701)',
-                navVerify: '🔍 فحص صفقة',
+                navSignIn: 'Sign In',
                 btnNav: '+ إنشاء صفقة',
                 heroBadge: 'نظام الضمان المالي المشفر نشط 24/7',
-                heroHeadline: 'ضمانك الأول لأي مبايعة..<br><span class="text-slate-400 font-light">بيع واشتر في أي مجال وأنت مرتاح</span>',
+                heroHeadline: 'The immutable<br><span class="text-slate-400 font-light">standard.</span>',
                 heroSub: 'المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات بأقل عمولة في السوق (تبدأ من 1%). حجز المبالغ بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.',
                 heroBtn1: 'ابدأ صفقة جديدة ⚡',
                 heroBtn2: 'احسب العمولة المخفضة 🧮',
@@ -584,10 +729,6 @@ def serve_home():
                 mLabel5: 'اسم / يوزر المشتري (اختياري)',
                 mBtnSubmit: 'إنشاء الرابط وحجز الضمان 🔒',
                 mBtnCancel: 'إلغاء',
-                vTitle: 'فحص والتحقق من حالة صفقة',
-                vSub: 'أدخل رمز الصفقة للاطلاع على حالة حجز المبلغ والأمان',
-                vBtn1: 'التحقق الآن',
-                vBtn2: 'إغلاق',
                 footerRights: 'جميع الحقوق محفوظة © منصة وثيق للوساطة والضمان المالي المشترك | safewatheeq.com',
                 footerReg: 'نظام وساطة رقمي آمن ومعتمد - خاضع للأنظمة التجارية السعودية',
                 curr: ' ريال'
@@ -597,7 +738,7 @@ def serve_home():
                 navCalc: 'Fee Calculator',
                 navSec: 'Security Protocol',
                 navLive: 'Live Deal (WTQ-701)',
-                navVerify: '🔍 Verify Deal',
+                navSignIn: 'Sign In',
                 btnNav: '+ Create Deal',
                 heroBadge: 'V1.0 IS LIVE & BANK-GRADE SECURED',
                 heroHeadline: 'The immutable<br><span class="text-slate-400 font-light">standard.</span>',
@@ -640,10 +781,6 @@ def serve_home():
                 mLabel5: 'Buyer Username (Optional)',
                 mBtnSubmit: 'Generate Room & Lock Escrow 🔒',
                 mBtnCancel: 'Cancel',
-                vTitle: 'Verify Escrow Deal Status',
-                vSub: 'Enter deal code to inspect real-time vault status and authenticity',
-                vBtn1: 'Verify Status',
-                vBtn2: 'Close',
                 footerRights: '© 2026 Watheeq Escrow Inc. All rights reserved | safewatheeq.com',
                 footerReg: 'Compliant with Saudi eCommerce and Digital Escrow Regulations',
                 curr: ' SAR'
@@ -662,7 +799,7 @@ def serve_home():
             document.getElementById('navCalc').innerText = data.navCalc;
             document.getElementById('navSec').innerText = data.navSec;
             document.getElementById('navLive').innerText = data.navLive;
-            document.getElementById('navVerify').innerText = data.navVerify;
+            document.getElementById('navSignIn').innerText = data.navSignIn;
             document.getElementById('btnNav').innerText = data.btnNav;
             
             document.getElementById('heroBadge').innerText = data.heroBadge;
@@ -711,11 +848,6 @@ def serve_home():
             document.getElementById('mBtnSubmit').innerText = data.mBtnSubmit;
             document.getElementById('mBtnCancel').innerText = data.mBtnCancel;
 
-            document.getElementById('vTitle').innerText = data.vTitle;
-            document.getElementById('vSub').innerText = data.vSub;
-            document.getElementById('vBtn1').innerText = data.vBtn1;
-            document.getElementById('vBtn2').innerText = data.vBtn2;
-
             document.getElementById('footerRights').innerText = data.footerRights;
             document.getElementById('footerReg').innerText = data.footerReg;
 
@@ -745,16 +877,6 @@ def serve_home():
         function openModal() { document.getElementById('createModal').classList.remove('hidden'); document.getElementById('createModal').classList.add('flex'); }
         function openModalWithValues() { document.getElementById('newPrice').value = document.getElementById('calcAmount').value; openModal(); }
         function closeModal() { document.getElementById('createModal').classList.add('hidden'); document.getElementById('createModal').classList.remove('flex'); }
-        
-        function openVerifyModal() { document.getElementById('verifyModal').classList.remove('hidden'); document.getElementById('verifyModal').classList.add('flex'); }
-        function closeVerifyModal() { document.getElementById('verifyModal').classList.add('hidden'); document.getElementById('verifyModal').classList.remove('flex'); }
-
-        function doVerify() {
-            const val = document.getElementById('verifyInput').value.trim();
-            if(val) {
-                window.location.href = '/deal/' + val;
-            }
-        }
 
         async function submitDeal() {
             const title = document.getElementById('newTitle').value;
@@ -840,8 +962,10 @@ def serve_deal_room(deal_id: str):
     <header class="border-b border-white/5 bg-black/60 backdrop-blur sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="/" class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center font-black text-sm text-white">و</div>
-                <span class="text-lg font-black tracking-tight text-white">وثيق</span>
+                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
+                <span class="text-lg font-black tracking-tight text-white uppercase">Watheeq</span>
             </a>
             <span class="text-xs bg-white/5 px-3 py-1.5 rounded-full border border-white/10 text-slate-300 font-mono">رقم الصفقة: {deal['id']}</span>
         </div>
