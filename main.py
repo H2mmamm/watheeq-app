@@ -259,7 +259,7 @@ def serve_verify_page():
 </body>
 </html>"""
 
-# صفحة تسجيل الدخول المحدثة بالكامل مع نظام الترجمة الشامل (عربي / إنجليزي)
+# صفحة تسجيل الدخول والإنشاء بنظام الترجمة الشامل المحدث
 @app.get("/login", response_class=HTMLResponse)
 def serve_login():
     return """<!DOCTYPE html>
@@ -294,16 +294,22 @@ def serve_login():
 
     <main class="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div class="auth-card p-8 md:p-10 rounded-3xl max-w-md w-full shadow-2xl relative text-center">
+            
             <h1 id="txtTitle" class="text-2xl font-black text-white mb-2">تسجيل الدخول</h1>
             <p id="txtSub" class="text-xs text-slate-400 mb-8">البريد الإلكتروني / رقم الهوية</p>
             
-            <div class="space-y-4 text-right" id="formDirection">
+            <div class="space-y-4" id="formContainer">
                 <input id="inputUser" type="text" placeholder="name@domain.com أو رقم الهوية" class="w-full input-box rounded-xl p-3.5 text-sm text-center font-mono">
-                <button onclick="simulateLogin()" id="btnContinue" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm">متابعة</button>
+                <button onclick="simulateAuth()" id="btnContinue" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm">متابعة</button>
+                
+                <div class="pt-4 border-t border-slate-800 space-y-3">
+                    <button onclick="alert('Google Auth')" class="w-full input-box hover:bg-slate-800 py-3 rounded-xl text-xs font-medium" id="btnGoogle">🌐 المتابعة باستخدام Google</button>
+                    <button onclick="alert('Apple Auth')" class="w-full input-box hover:bg-slate-800 py-3 rounded-xl text-xs font-medium" id="btnApple">🍏 المتابعة باستخدام Apple</button>
+                </div>
             </div>
 
             <div class="mt-8 text-xs text-slate-500 space-y-2">
-                <a href="/" class="text-yellow-400 block hover:underline" id="txtCreate">إنشاء حساب وثيق جديد</a>
+                <button onclick="toggleMode()" id="txtToggleMode" class="text-yellow-400 hover:underline bg-transparent border-0 cursor-pointer">إنشاء حساب وثيق جديد</button>
             </div>
         </div>
     </main>
@@ -314,54 +320,81 @@ def serve_login():
 
     <script>
         let currentLang = 'ar';
+        let isSignupMode = false;
 
         const translations = {
             ar: {
                 dir: 'rtl',
                 langBtn: 'English',
                 navHome: 'الرئيسية',
-                title: 'تسجيل الدخول',
-                sub: 'البريد الإلكتروني / رقم الهوية',
-                placeholder: 'name@domain.com أو رقم الهوية',
-                btn: 'متابعة',
-                create: 'إنشاء حساب وثيق جديد',
-                success: '✅ تم تسجيل الدخول والانتقال للغرفة التجريبية بنجاح!'
+                loginTitle: 'تسجيل الدخول',
+                loginSub: 'البريد الإلكتروني / رقم الهوية',
+                signupTitle: 'إنشاء حساب جديد',
+                signupSub: 'أدخل بريدك واسمك لإنشاء حساب موثق',
+                placeholderLogin: 'name@domain.com أو رقم الهوية',
+                placeholderSignup: 'الاسم الكامل أو البريد الإلكتروني',
+                btnContinue: 'متابعة',
+                btnGoogle: '🌐 المتابعة باستخدام Google',
+                btnApple: '🍏 المتابعة باستخدام Apple',
+                toggleToSignup: 'إنشاء حساب وثيق جديد',
+                toggleToLogin: 'لديك حساب بالفعل؟ تسجيل الدخول',
+                successLogin: '✅ تم تسجيل الدخول والانتقال للغرفة التجريبية بنجاح!',
+                successSignup: '✅ تم إنشاء الحساب بنجاح! جاري تحويلك...'
             },
             en: {
                 dir: 'ltr',
                 langBtn: 'العربية',
                 navHome: 'Home',
-                title: 'Sign In',
-                sub: 'Email / National ID',
-                placeholder: 'name@domain.com or ID',
-                btn: 'Continue',
-                create: 'Create a new Watheeq account',
-                success: '✅ Signed in successfully! Redirecting to demo vault...'
+                loginTitle: 'Sign In',
+                loginSub: 'Email / National ID',
+                signupTitle: 'Create Account',
+                signupSub: 'Enter your email & name to register',
+                placeholderLogin: 'name@domain.com or ID',
+                placeholderSignup: 'Full Name or Email',
+                btnContinue: 'Continue',
+                btnGoogle: '🌐 Continue with Google',
+                btnApple: '🍏 Continue with Apple',
+                toggleToSignup: 'Create a new Watheeq account',
+                toggleToLogin: 'Already have an account? Sign In',
+                successLogin: '✅ Signed in successfully! Redirecting to demo vault...',
+                successSignup: '✅ Account created successfully! Redirecting...'
             }
         };
 
         function toggleLang() {
             currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            updateTexts();
+        }
+
+        function toggleMode() {
+            isSignupMode = !isSignupMode;
+            updateTexts();
+        }
+
+        function updateTexts() {
             const t = translations[currentLang];
-            
             document.getElementById('htmlRoot').setAttribute('dir', t.dir);
             document.getElementById('htmlRoot').setAttribute('lang', currentLang);
             document.getElementById('langBtnText').innerText = t.langBtn;
             document.getElementById('navHome').innerText = t.navHome;
-            document.getElementById('txtTitle').innerText = t.title;
-            document.getElementById('txtSub').innerText = t.sub;
-            document.getElementById('inputUser').placeholder = t.placeholder;
-            document.getElementById('btnContinue').innerText = t.btn;
-            document.getElementById('txtCreate').innerText = t.create;
+            
+            document.getElementById('txtTitle').innerText = isSignupMode ? t.signupTitle : t.loginTitle;
+            document.getElementById('txtSub').innerText = isSignupMode ? t.signupSub : t.loginSub;
+            document.getElementById('inputUser').placeholder = isSignupMode ? t.placeholderSignup : t.placeholderLogin;
+            document.getElementById('btnContinue').innerText = t.btnContinue;
+            document.getElementById('btnGoogle').innerText = t.btnGoogle;
+            document.getElementById('btnApple').innerText = t.btnApple;
+            document.getElementById('txtToggleMode').innerText = isSignupMode ? t.toggleToLogin : t.toggleToSignup;
         }
 
-        function simulateLogin() {
+        function simulateAuth() {
             const val = document.getElementById('inputUser').value.trim();
+            const t = translations[currentLang];
             if(!val) { 
-                alert(currentLang === 'ar' ? 'يرجى إدخال البريد أو الهوية' : 'Please enter email or ID'); 
+                alert(currentLang === 'ar' ? 'يرجى إكمال الحقل المطلوب' : 'Please fill in the required field'); 
                 return; 
             }
-            alert(translations[currentLang].success);
+            alert(isSignupMode ? t.successSignup : t.successLogin);
             window.location.href = '/deal/WTQ-701';
         }
     </script>
@@ -549,7 +582,7 @@ def serve_deal_room(deal_id: str):
                     const htmlContent = file.type.startsWith('image') 
                         ? `<img src="${e.target.result}" class="max-w-xs rounded-xl mt-2 border border-white/10">` 
                         : `<video src="${e.target.result}" controls class="max-w-xs rounded-xl mt-2 border border-white/10"></video>`;
-                    await postMsg('المستخدم (صورة/فيديو مرفق)', htmlContent);
+                    await postObjMsg('المستخدم (صورة/فيديو مرفق)', htmlContent);
                 };
                 reader.readAsDataURL(file);
             }
