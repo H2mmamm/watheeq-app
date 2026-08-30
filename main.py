@@ -9,7 +9,7 @@ import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-app = FastAPI(title="وثيق | Watheeq - Immutable Trust & Escrow Standard")
+app = FastAPI(title="وثيق | Watheeq - Escrow & Trust Platform")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -162,7 +162,7 @@ def create_deal(req: CreateDealRequest):
     if "1%" in req.category:
         fee_percent = 1.0
         fee_amount = round((req.price * 1.0) / 100, 2)
-        if "بحد أقصى 50" in req.category and fee_amount > 50:
+        if ("50" in req.category or "Cap" in req.category) and fee_amount > 50:
             fee_amount = 50.0
             
     total_paid = round(req.price + fee_amount, 2)
@@ -252,33 +252,33 @@ def serve_home():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="siteTitle">Watheeq | The Immutable Standard</title>
+    <title id="siteTitle">وثيق | Watheeq - The Immutable Standard</title>
     
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://safewatheeq.com/">
-    <meta property="og:title" content="Watheeq | المنصة الشاملة للضمان والوساطة المالية">
+    <meta property="og:title" content="Watheeq | الوساطة والضمان المالي الذكي">
     <meta property="og:description" content="The immutable standard for sovereign trust and secure escrow.">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', 'Tajawal', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; }
+        body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; }
         .hero-glow {
-            background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.95) 75%);
+            background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.08) 0%, rgba(3, 3, 3, 0.98) 75%);
         }
         .light-streak {
             position: absolute;
-            width: 140%;
-            height: 350px;
-            top: 25%;
-            left: -20%;
-            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.15) 0%, rgba(255,255,255,0.03) 40%, rgba(0,0,0,0) 70%);
-            transform: rotate(-12deg);
+            width: 130%;
+            height: 320px;
+            top: 20%;
+            left: -15%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(255,255,255,0.02) 40%, rgba(0,0,0,0) 70%);
+            transform: rotate(-10deg);
             pointer-events: none;
-            filter: blur(40px);
+            filter: blur(50px);
         }
         .card-dark {
-            background: rgba(12, 12, 14, 0.7);
+            background: rgba(14, 14, 18, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
         }
@@ -295,17 +295,17 @@ def serve_home():
             transform: scale(1.02);
         }
         .btn-glass {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ffffff;
             transition: all 0.2s ease;
         }
         .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.1);
         }
         .pill-badge {
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -317,225 +317,408 @@ def serve_home():
     <header class="border-b border-white/5 bg-black/60 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <!-- Brand Logo -->
-            <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                        <path d="M7 6h10M7 18h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-                    </svg>
-                    <span class="text-xl font-bold tracking-tight text-white uppercase">Watheeq</span>
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+                <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center font-black text-lg text-white">و</div>
+                <div class="flex flex-col text-right">
+                    <span class="text-lg font-black tracking-tight text-white">وثيق</span>
+                    <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase font-mono">WATHEEQ</span>
                 </div>
             </div>
             
             <!-- Nav Links -->
-            <nav class="hidden md:flex items-center gap-8 text-xs font-medium text-slate-400">
-                <a href="#calculator" class="hover:text-white transition" id="nav1">حاسبة كسر السوق</a>
-                <a href="#anti-fraud" class="hover:text-white transition" id="nav2">بروتوكول الأمان</a>
-                <a href="/deal/WTQ-701" class="hover:text-white transition" id="nav3">غرفة حية (WTQ-701)</a>
+            <nav class="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-400">
+                <a href="#calculator" class="hover:text-white transition" id="navCalc">حاسبة العمولات</a>
+                <a href="#security" class="hover:text-white transition" id="navSec">بروتوكول الأمان</a>
+                <a href="/deal/WTQ-701" class="hover:text-white transition" id="navLive">غرفة حية (WTQ-701)</a>
             </nav>
 
             <!-- Actions -->
             <div class="flex items-center gap-3">
-                <button onclick="toggleLang()" id="langBtn" class="pill-badge text-slate-300 px-3 py-1.5 rounded-full text-xs font-medium hover:border-white/30 transition">
-                    EN / AR
+                <button onclick="toggleLanguage()" id="langBtn" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition">
+                    🌐 English
                 </button>
-                <button onclick="openVerifyModal()" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-medium hover:border-white/30 transition flex items-center gap-1.5">
-                    <span>Verify</span>
+                <button onclick="openVerifyModal()" class="pill-badge text-slate-300 px-3.5 py-1.5 rounded-full text-xs font-semibold hover:border-white/30 transition flex items-center gap-1.5">
+                    <span id="navVerify">🔍 فحص صفقة</span>
                 </button>
-                <button onclick="openModal()" class="btn-white text-xs font-bold px-4 py-2 rounded-full shadow-sm hover:scale-105 transition" id="btnNav">
-                    + ابدأ صفقة
+                <button onclick="openModal()" class="btn-white text-xs font-black px-5 py-2 rounded-full shadow-sm hover:scale-105 transition" id="btnNav">
+                    + إنشاء صفقة
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Main Hero Section -->
-    <main class="hero-glow flex-1 flex flex-col items-center justify-center text-center px-6 py-24 relative z-10">
+    <main class="hero-glow flex-1 flex flex-col items-center justify-center text-center px-6 py-20 relative z-10">
         
         <!-- Live Status Badge -->
-        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full pill-badge text-emerald-400 text-[11px] font-mono tracking-wide mb-8">
+        <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full pill-badge text-emerald-400 text-xs font-mono tracking-wide mb-8">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>V1.0 IS LIVE & SECURE</span>
+            <span id="heroBadge">V1.0 IS LIVE & SECURE</span>
         </div>
 
         <!-- Hero Headline -->
-        <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.1] max-w-4xl mb-6" id="heroTitle">
-            The immutable<br>standard.
+        <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.2] max-w-4xl mb-6" id="heroHeadline">
+            The immutable<br><span class="text-slate-400 font-light">standard.</span>
         </h1>
 
-        <p class="text-slate-400 text-sm md:text-base max-w-xl mb-10 leading-relaxed font-light" id="heroDesc">
-            المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات بأقل عمولة في السوق (تبدأ من 1%). حجز المبالغ بنكياً عبر Apple Pay حتى الفحص والتسليم التام.
+        <p class="text-slate-400 text-sm md:text-base max-w-2xl mb-10 leading-relaxed font-normal" id="heroSub">
+            المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات بأقل عمولة في السوق (تبدأ من 1%). حجز المبالغ بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.
         </p>
 
         <!-- CTA Buttons -->
         <div class="flex flex-wrap items-center justify-center gap-4 mb-16">
-            <button onclick="openModal()" class="btn-white text-sm font-semibold px-8 py-3.5 rounded-full flex items-center gap-2" id="btnStart">
+            <button onclick="openModal()" class="btn-white text-sm font-bold px-8 py-3.5 rounded-full flex items-center gap-2" id="heroBtn1">
                 <span>ابدأ صفقة جديدة</span>
-                <span class="text-base">→</span>
+                <span class="text-base">⚡</span>
             </button>
-            <a href="#calculator" class="btn-glass text-sm font-medium px-8 py-3.5 rounded-full" id="btnCalc">
-                احسب العمولة المخفضة
+            <a href="#calculator" class="btn-glass text-sm font-semibold px-8 py-3.5 rounded-full" id="heroBtn2">
+                احسب العمولة المخفضة 🧮
             </a>
         </div>
 
-        <!-- Trust Badges Bar -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl w-full text-left">
-            <div class="card-dark p-4 rounded-2xl">
-                <p class="text-xs text-slate-500 mb-1">العمولة للأصول والألعاب</p>
-                <p class="text-lg font-bold text-white font-mono">2.5% <span class="text-xs text-emerald-400 font-normal">أرخص سعر</span></p>
+        <!-- Market Breaker Rates Bar -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full text-right" id="statsContainer">
+            <div class="card-dark p-5 rounded-2xl">
+                <p class="text-xs text-slate-400 mb-1" id="stat1Label">الأصول والحسابات والألعاب</p>
+                <p class="text-lg font-black text-white font-mono">2.5% <span class="text-[11px] text-emerald-400 font-normal" id="stat1Sub">أقل عمولة</span></p>
             </div>
-            <div class="card-dark p-4 rounded-2xl">
-                <p class="text-xs text-slate-500 mb-1">عربون وفحص السيارات</p>
-                <p class="text-lg font-bold text-white font-mono">1% <span class="text-xs text-slate-400 font-normal">(حد أقصى 50﷼)</span></p>
+            <div class="card-dark p-5 rounded-2xl">
+                <p class="text-xs text-slate-400 mb-1" id="stat2Label">عربون وفحص السيارات</p>
+                <p class="text-lg font-black text-white font-mono">1% <span class="text-[11px] text-slate-400 font-normal" id="stat2Sub">(حد أقصى 50﷼)</span></p>
             </div>
-            <div class="card-dark p-4 rounded-2xl">
-                <p class="text-xs text-slate-500 mb-1">مؤقت الاسترجاع التلقائي</p>
-                <p class="text-lg font-bold text-white font-mono">10 Min <span class="text-xs text-slate-400 font-normal">حماية فورية</span></p>
+            <div class="card-dark p-5 rounded-2xl">
+                <p class="text-xs text-slate-400 mb-1" id="stat3Label">مؤقت الاسترجاع التلقائي</p>
+                <p class="text-lg font-black text-white font-mono">10 Min <span class="text-[11px] text-slate-400 font-normal" id="stat3Sub">حماية فورية</span></p>
             </div>
-            <div class="card-dark p-4 rounded-2xl">
-                <p class="text-xs text-slate-500 mb-1">بوابات الدفع المشفرة</p>
-                <p class="text-lg font-bold text-white font-mono">Pay / مدى</p>
+            <div class="card-dark p-5 rounded-2xl">
+                <p class="text-xs text-slate-400 mb-1" id="stat4Label">بوابات الدفع المشفرة</p>
+                <p class="text-lg font-black text-white font-mono">Pay / مدى</p>
             </div>
         </div>
 
     </main>
 
-    <!-- Calculator Section (Market Breaker) -->
+    <!-- Calculator Section -->
     <section id="calculator" class="max-w-4xl mx-auto px-6 py-16 w-full relative z-10">
         <div class="card-dark p-8 md:p-10 rounded-3xl">
             <div class="text-center mb-8">
-                <h3 class="text-2xl font-bold text-white mb-2">حاسبة كسر السوق والعمولات المخفضة</h3>
-                <p class="text-xs text-slate-400">تحطيم أسعار العمولات التقليدية لضمان أعلى فائدة للبائع والمشتري</p>
+                <h3 class="text-2xl font-black text-white mb-2" id="calcHead">حاسبة كسر السوق والعمولات الشفافة</h3>
+                <p class="text-xs text-slate-400" id="calcSub">تحطيم أسعار العمولات التقليدية لضمان أعلى فائدة للبائع والمشتري</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-2">قيمة الصفقة أو العربون (ريال):</label>
+                    <label class="block text-xs font-bold text-slate-400 mb-2" id="lblAmount">قيمة الصفقة أو العربون:</label>
                     <input id="calcAmount" type="number" value="1000" oninput="runCalculator()" class="w-full bg-black/60 border border-white/10 rounded-2xl p-3.5 text-white font-mono font-bold outline-none focus:border-white/40">
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-2">مجال الوساطة:</label>
+                    <label class="block text-xs font-bold text-slate-400 mb-2" id="lblCat">مجال الوساطة:</label>
                     <select id="calcCategory" onchange="runCalculator()" class="w-full bg-black/60 border border-white/10 rounded-2xl p-3.5 text-white text-sm outline-none focus:border-white/40">
-                        <option value="digital">الأصول الرقمية، الحسابات، والألعاب (2.5%)</option>
-                        <option value="freelance">الخدمات والبرمجة والتصميم (2.5%)</option>
-                        <option value="car_deposit">عربون حجز وفحص المركبات (1% بحد أقصى 50 ريال)</option>
-                        <option value="goods">السلع العامة والأجهزة الإلكترونية (1%)</option>
+                        <option value="digital" id="opt1">الأصول الرقمية، الحسابات، والألعاب (2.5%)</option>
+                        <option value="freelance" id="opt2">الخدمات والعمل الحر والبرمجة (2.5%)</option>
+                        <option value="car_deposit" id="opt3">عربون حجز وفحص المركبات (1% بحد أقصى 50 ريال)</option>
+                        <option value="goods" id="opt4">الأجهزة الإلكترونية والسلع (1%)</option>
                     </select>
                 </div>
             </div>
 
             <div class="grid grid-cols-3 gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-center mb-6 font-mono">
                 <div>
-                    <span class="block text-[11px] text-slate-500 mb-1">المبلغ للبائع</span>
-                    <span id="calcNet" class="text-base md:text-lg font-bold text-white">1,000 SAR</span>
+                    <span class="block text-[11px] text-slate-500 mb-1" id="resSeller">المبلغ للبائع</span>
+                    <span id="calcNet" class="text-base md:text-lg font-bold text-white">1,000 ريال</span>
                 </div>
                 <div>
-                    <span class="block text-[11px] text-slate-400 mb-1">عمولة وثيق</span>
-                    <span id="calcFee" class="text-base md:text-lg font-bold text-slate-300">25 SAR</span>
+                    <span class="block text-[11px] text-slate-400 mb-1" id="resFee">عمولة وثيق</span>
+                    <span id="calcFee" class="text-base md:text-lg font-bold text-slate-300">25 ريال</span>
                 </div>
                 <div>
-                    <span class="block text-[11px] text-emerald-400 mb-1">الإجمالي المطلوب للدفع</span>
-                    <span id="calcTotal" class="text-base md:text-lg font-bold text-emerald-400">1,025 SAR</span>
+                    <span class="block text-[11px] text-emerald-400 mb-1" id="resTotal">الإجمالي المطلوب للدفع</span>
+                    <span id="calcTotal" class="text-base md:text-lg font-black text-emerald-400">1,025 ريال</span>
                 </div>
             </div>
 
             <div class="text-center">
-                <button onclick="openModalWithValues()" class="btn-white text-xs font-bold px-8 py-3.5 rounded-full">
+                <button onclick="openModalWithValues()" class="btn-white text-xs font-black px-8 py-3.5 rounded-full" id="calcBtn">
                     ابدأ بهذه الحسبة المخفضة 🚀
                 </button>
             </div>
         </div>
     </section>
 
+    <!-- Security Protocol Section -->
+    <section id="security" class="max-w-6xl mx-auto px-6 py-12 relative z-10">
+        <div class="text-center mb-10">
+            <h3 class="text-2xl font-black text-white mb-2" id="secHead">ترسانة الحماية ومنع الاحتيال</h3>
+            <p class="text-xs text-slate-400" id="secSub">آليات مالية صارمة لحماية أموالك وسلعك أثناء البيع والشراء</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card-dark p-6 rounded-2xl">
+                <div class="text-3xl mb-3">⏱️</div>
+                <h4 class="text-sm font-bold text-white mb-2" id="sec1Title">مؤقت الاسترجاع الفوري (10 دقائق)</h4>
+                <p class="text-xs text-slate-400 leading-relaxed" id="sec1Desc">في الصفقات الرقمية والحسابات، إذا لم يقم البائع بتسليم البيانات خلال 10 دقائق، يقوم النظام تلقائياً بإرجاع المبلغ للمشتري.</p>
+            </div>
+            <div class="card-dark p-6 rounded-2xl">
+                <div class="text-3xl mb-3">🚗</div>
+                <h4 class="text-sm font-bold text-white mb-2" id="sec2Title">ضمان عربون فحص السيارات</h4>
+                <p class="text-xs text-slate-400 leading-relaxed" id="sec2Desc">احجز سيارتك وافحصها بالورشة وأنت مطمئن؛ العربون محفوظ ولا يتحول للبائع إلا بموافقتك بعد التأكد من سلامة الفحص.</p>
+            </div>
+            <div class="card-dark p-6 rounded-2xl">
+                <div class="text-3xl mb-3">Pay</div>
+                <h4 class="text-sm font-bold text-white mb-2" id="sec3Title">حجز مصرفي عبر Apple Pay ومدى</h4>
+                <p class="text-xs text-slate-400 leading-relaxed" id="sec3Desc">الأموال لا تذهب لحسابات أفراد شخصية، بل تُجمد بنكياً في خزينة منصة وثيق المحايدة حتى اكتمال التبادل بالكامل.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Modal إنشاء صفقة -->
     <div id="createModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="card-dark p-8 rounded-3xl max-w-lg w-full text-right border border-white/20">
-            <h3 class="text-xl font-bold text-white mb-1">إنشاء رابط صفقة مشفرة</h3>
-            <p class="text-xs text-slate-400 mb-6">سيتم توليد غرفة تسليم آمنة برابط مباشر للأطراف مع بوابة حجز بنكي.</p>
+        <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20">
+            <h3 class="text-xl font-black text-white mb-1" id="mTitle">إنشاء رابط صفقة وساطة جديد</h3>
+            <p class="text-xs text-slate-400 mb-6" id="mSub">سيتم إنشاء غرفة تسليم مشفرة برابط مباشر للأطراف مع بوابة حجز بنكي.</p>
             
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-slate-400 block mb-1">عنوان الصفقة أو السلعة</label>
-                    <input id="newTitle" type="text" placeholder="مثال: عربون فحص لاندكروزر / حساب كود / مشروع ويب" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                    <label class="text-xs text-slate-400 block mb-1" id="mLabel1">عنوان الصفقة أو السلعة</label>
+                    <input id="newTitle" type="text" placeholder="عربون فحص كامري / حساب ألعاب / برمجة متجر" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 block mb-1">القسم والتصنيف</label>
+                    <label class="text-xs text-slate-400 block mb-1" id="mLabel2">القسم والتصنيف</label>
                     <select id="newCategory" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
-                        <option>الأصول الرقمية والحسابات (2.5%)</option>
-                        <option>الخدمات والعمل الحر (2.5%)</option>
-                        <option>عربون وفحص المركبات (1% بحد أقصى 50 ريال)</option>
-                        <option>السلع والأجهزة الإلكترونية (1%)</option>
+                        <option value="digital">الأصول الرقمية والحسابات (2.5%)</option>
+                        <option value="freelance">الخدمات والعمل الحر (2.5%)</option>
+                        <option value="car_deposit">عربون وفحص المركبات (1% بحد أقصى 50 ريال)</option>
+                        <option value="goods">الأجهزة الإلكترونية والسلع (1%)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 block mb-1">المبلغ المطلوب (ريال)</label>
+                    <label class="text-xs text-slate-400 block mb-1" id="mLabel3">المبلغ المطلوب</label>
                     <input id="newPrice" type="number" placeholder="1000" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-xs text-slate-400 block mb-1">اسم / يوزر البائع</label>
+                        <label class="text-xs text-slate-400 block mb-1" id="mLabel4">اسم / يوزر البائع</label>
                         <input id="newSeller" type="text" placeholder="البائع" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400 block mb-1">اسم / يوزر المشتري</label>
-                        <input id="newBuyer" type="text" placeholder="المشتري" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
+                        <label class="text-xs text-slate-400 block mb-1" id="mLabel5">اسم / يوزر المشتري</label>
+                        <input id="newBuyer" type="text" placeholder="المشتري (اختياري)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-white/40">
                     </div>
                 </div>
             </div>
 
             <div class="mt-6 flex gap-3">
-                <button onclick="submitDeal()" class="flex-1 btn-white text-xs font-bold py-3 rounded-xl">إنشاء الرابط وحجز الضمان 🔒</button>
-                <button onclick="closeModal()" class="px-5 py-3 btn-glass text-xs rounded-xl">إلغاء</button>
+                <button onclick="submitDeal()" class="flex-1 btn-white text-xs font-black py-3 rounded-xl" id="mBtnSubmit">إنشاء الرابط وحجز الضمان 🔒</button>
+                <button onclick="closeModal()" class="px-5 py-3 btn-glass text-xs rounded-xl" id="mBtnCancel">إلغاء</button>
             </div>
         </div>
     </div>
 
-    <!-- Verify Modal (Like Reference Design) -->
+    <!-- Verify Modal -->
     <div id="verifyModal" class="fixed inset-0 bg-black/95 backdrop-blur-lg hidden items-center justify-center p-4 z-50">
         <div class="card-dark p-8 rounded-3xl max-w-md w-full text-center border border-white/10">
-            <h3 class="text-2xl font-bold text-white mb-2">Verify Deal / Document</h3>
-            <p class="text-xs text-slate-400 mb-6">Enter a deal ID or scan verification token to inspect state</p>
-            <input id="verifyInput" type="text" placeholder="e.g. WTQ-701" class="w-full bg-black/60 border border-white/10 rounded-2xl p-3.5 text-center text-white font-mono text-sm uppercase mb-4 outline-none focus:border-white/40">
+            <h3 class="text-xl font-bold text-white mb-2" id="vTitle">فحص والتحقق من حالة صفقة</h3>
+            <p class="text-xs text-slate-400 mb-6" id="vSub">أدخل رمز الصفقة للاطلاع على حالة حجز المبلغ والأمان</p>
+            <input id="verifyInput" type="text" placeholder="WTQ-701" class="w-full bg-black/60 border border-white/10 rounded-2xl p-3.5 text-center text-white font-mono text-sm uppercase mb-4 outline-none focus:border-white/40">
             <div class="flex gap-3">
-                <button onclick="doVerify()" class="flex-1 btn-white text-xs font-bold py-3 rounded-xl">Verify Authenticity</button>
-                <button onclick="closeVerifyModal()" class="px-5 py-3 btn-glass text-xs rounded-xl">Close</button>
+                <button onclick="doVerify()" class="flex-1 btn-white text-xs font-bold py-3 rounded-xl" id="vBtn1">التحقق الآن</button>
+                <button onclick="closeVerifyModal()" class="px-5 py-3 btn-glass text-xs rounded-xl" id="vBtn2">إغلاق</button>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="border-t border-white/5 py-10 bg-black text-center text-xs text-slate-600 relative z-10 space-y-3">
-        <div class="flex items-center justify-center gap-6 text-slate-500 font-mono text-[11px]">
-            <span>BANK-GRADE ENCRYPTION</span>
-            <span>•</span>
-            <span>INSTANT SETTLEMENT</span>
-            <span>•</span>
-            <span>IMMUTABLE RECORD</span>
-        </div>
-        <p>© 2026 Watheeq Inc. All rights reserved. Platform operates under Saudi eCommerce Regulations.</p>
+    <footer class="border-t border-white/5 py-8 bg-black text-center text-xs text-slate-500 relative z-10 space-y-2">
+        <p id="footerRights">جميع الحقوق محفوظة © منصة وثيق للوساطة والضمان المالي المشترك | safewatheeq.com</p>
+        <p class="text-slate-600" id="footerReg">نظام وساطة رقمي آمن ومعتمد - خاضع للأنظمة التجارية السعودية</p>
     </footer>
 
     <script>
-        let isAr = true;
+        let currentLang = 'ar';
 
-        function toggleLang() {
-            isAr = !isAr;
-            const html = document.getElementById('htmlTag');
-            html.setAttribute('dir', isAr ? 'rtl' : 'ltr');
-            html.setAttribute('lang', isAr ? 'ar' : 'en');
-            document.getElementById('langBtn').innerText = isAr ? 'EN / AR' : 'AR / EN';
-            
-            if(!isAr) {
-                document.getElementById('heroTitle').innerHTML = 'The immutable<br>standard.';
-                document.getElementById('heroDesc').innerText = 'The leading sovereign escrow platform in Saudi Arabia. Secure any transaction, car deposit, or digital asset with ultra-low fees starting at 1%.';
-                document.getElementById('btnStart').innerText = 'Start Deal →';
-                document.getElementById('btnCalc').innerText = 'Calculate Fees';
-            } else {
-                document.getElementById('heroTitle').innerHTML = 'The immutable<br>standard.';
-                document.getElementById('heroDesc').innerText = 'المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات بأقل عمولة في السوق (تبدأ من 1%). حجز المبالغ بنكياً عبر Apple Pay حتى الفحص والتسليم التام.';
-                document.getElementById('btnStart').innerText = 'ابدأ صفقة جديدة →';
-                document.getElementById('btnCalc').innerText = 'احسب العمولة المخفضة';
+        const i18n = {
+            ar: {
+                langBtn: '🌐 English',
+                navCalc: 'حاسبة العمولات',
+                navSec: 'بروتوكول الأمان',
+                navLive: 'غرفة حية (WTQ-701)',
+                navVerify: '🔍 فحص صفقة',
+                btnNav: '+ إنشاء صفقة',
+                heroBadge: 'نظام الضمان المالي المشفر نشط 24/7',
+                heroHeadline: 'ضمانك الأول لأي مبايعة..<br><span class="text-slate-400 font-light">بيع واشتر في أي مجال وأنت مرتاح</span>',
+                heroSub: 'المنصة والوساطة المالية السعودية لضمان وتأمين كافة المبايعات والصفقات بأقل عمولة في السوق (تبدأ من 1%). حجز المبالغ بنكياً عبر Apple Pay ومدى حتى الفحص والتسليم التام.',
+                heroBtn1: 'ابدأ صفقة جديدة ⚡',
+                heroBtn2: 'احسب العمولة المخفضة 🧮',
+                stat1Label: 'الأصول والحسابات والألعاب',
+                stat1Sub: 'أقل عمولة',
+                stat2Label: 'عربون وفحص السيارات',
+                stat2Sub: '(حد أقصى 50﷼)',
+                stat3Label: 'مؤقت الاسترجاع التلقائي',
+                stat3Sub: 'حماية فورية',
+                stat4Label: 'بوابات الدفع المشفرة',
+                calcHead: 'حاسبة كسر السوق والعمولات الشفافة',
+                calcSub: 'تحطيم أسعار العمولات التقليدية لضمان أعلى فائدة للبائع والمشتري',
+                lblAmount: 'قيمة الصفقة أو العربون (ريال سعودي):',
+                lblCat: 'مجال الوساطة:',
+                opt1: 'الأصول الرقمية، الحسابات، والألعاب (2.5%)',
+                opt2: 'الخدمات والعمل الحر والبرمجة (2.5%)',
+                opt3: 'عربون حجز وفحص المركبات (1% بحد أقصى 50 ريال)',
+                opt4: 'الأجهزة الإلكترونية والسلع (1%)',
+                resSeller: 'المبلغ للبائع',
+                resFee: 'عمولة وثيق',
+                resTotal: 'الإجمالي المطلوب للدفع',
+                calcBtn: 'ابدأ بهذه الحسبة المخفضة 🚀',
+                secHead: 'ترسانة الحماية ومنع الاحتيال',
+                secSub: 'آليات مالية صارمة لحماية أموالك وسلعك أثناء البيع والشراء',
+                sec1Title: 'مؤقت الاسترجاع الفوري (10 دقائق)',
+                sec1Desc: 'في الصفقات الرقمية والحسابات، إذا لم يقم البائع بتسليم البيانات خلال 10 دقائق، يقوم النظام تلقائياً بإرجاع المبلغ للمشتري.',
+                sec2Title: 'ضمان عربون فحص السيارات',
+                sec2Desc: 'احجز سيارتك وافحصها بالورشة وأنت مطمئن؛ العربون محفوظ ولا يتحول للبائع إلا بموافقتك بعد التأكد من سلامة الفحص.',
+                sec3Title: 'حجز مصرفي عبر Apple Pay ومدى',
+                sec3Desc: 'الأموال لا تذهب لحسابات أفراد شخصية، بل تُجمد بنكياً في خزينة منصة وثيق المحايدة حتى اكتمال التبادل بالكامل.',
+                mTitle: 'إنشاء رابط صفقة وساطة جديد',
+                mSub: 'سيتم إنشاء غرفة تسليم مشفرة برابط مباشر للأطراف مع بوابة حجز بنكي.',
+                mLabel1: 'عنوان الصفقة أو السلعة',
+                mLabel2: 'القسم والتصنيف',
+                mLabel3: 'المبلغ المطلوب (ريال)',
+                mLabel4: 'اسم / يوزر البائع',
+                mLabel5: 'اسم / يوزر المشتري (اختياري)',
+                mBtnSubmit: 'إنشاء الرابط وحجز الضمان 🔒',
+                mBtnCancel: 'إلغاء',
+                vTitle: 'فحص والتحقق من حالة صفقة',
+                vSub: 'أدخل رمز الصفقة للاطلاع على حالة حجز المبلغ والأمان',
+                vBtn1: 'التحقق الآن',
+                vBtn2: 'إغلاق',
+                footerRights: 'جميع الحقوق محفوظة © منصة وثيق للوساطة والضمان المالي المشترك | safewatheeq.com',
+                footerReg: 'نظام وساطة رقمي آمن ومعتمد - خاضع للأنظمة التجارية السعودية',
+                curr: ' ريال'
+            },
+            en: {
+                langBtn: '🌐 العربية',
+                navCalc: 'Fee Calculator',
+                navSec: 'Security Protocol',
+                navLive: 'Live Deal (WTQ-701)',
+                navVerify: '🔍 Verify Deal',
+                btnNav: '+ Create Deal',
+                heroBadge: 'V1.0 IS LIVE & BANK-GRADE SECURED',
+                heroHeadline: 'The immutable<br><span class="text-slate-400 font-light">standard.</span>',
+                heroSub: 'The premier Saudi escrow and trust platform. Secure any digital asset, freelance milestone, or car inspection deposit with ultra-low fees starting at 1% via Apple Pay & Mada.',
+                heroBtn1: 'Start Secure Deal ⚡',
+                heroBtn2: 'Calculate Lowest Fees 🧮',
+                stat1Label: 'Digital Assets & Gaming',
+                stat1Sub: 'Lowest in Market',
+                stat2Label: 'Car Deposit & Inspection',
+                stat2Sub: '(Max 50 SAR Cap)',
+                stat3Label: 'Auto-Refund Timer',
+                stat3Sub: 'Instant Protection',
+                stat4Label: 'Encrypted Payment',
+                calcHead: 'Market Breaker Fee Calculator',
+                calcSub: 'Transparent, ultra-low fees engineered to maximize savings for buyers and sellers',
+                lblAmount: 'Deal / Deposit Amount (SAR):',
+                lblCat: 'Escrow Category:',
+                opt1: 'Digital Assets, Accounts & Gaming (2.5%)',
+                opt2: 'Freelance, Services & Code (2.5%)',
+                opt3: 'Car Inspection Deposit (1% capped at 50 SAR)',
+                opt4: 'Electronics & General Goods (1%)',
+                resSeller: 'Net to Seller',
+                resFee: 'Watheeq Fee',
+                resTotal: 'Total Deposit Required',
+                calcBtn: 'Start Deal with this Calculation 🚀',
+                secHead: 'Anti-Fraud & Security Suite',
+                secSub: 'Rigorous financial and technical safeguards eliminating transaction fraud',
+                sec1Title: '10-Minute Auto Refund',
+                sec1Desc: 'For fast digital trades, if credentials are not delivered within 10 minutes, full funds automatically refund to the buyer.',
+                sec2Title: 'Vehicle Inspection Deposit',
+                sec2Desc: 'Inspect vehicles with peace of mind. Deposits are held in neutral escrow until you approve the mechanical report.',
+                sec3Title: 'Apple Pay & Mada Escrow Vault',
+                sec3Desc: 'No personal bank transfers. Funds are frozen inside institutional banking vaults until verified completion.',
+                mTitle: 'Create New Escrow Deal Room',
+                mSub: 'Generate an instant encrypted escrow room with integrated checkout.',
+                mLabel1: 'Deal Title / Item Description',
+                mLabel2: 'Category',
+                mLabel3: 'Required Amount (SAR)',
+                mLabel4: 'Seller Username / Name',
+                mLabel5: 'Buyer Username (Optional)',
+                mBtnSubmit: 'Generate Room & Lock Escrow 🔒',
+                mBtnCancel: 'Cancel',
+                vTitle: 'Verify Escrow Deal Status',
+                vSub: 'Enter deal code to inspect real-time vault status and authenticity',
+                vBtn1: 'Verify Status',
+                vBtn2: 'Close',
+                footerRights: '© 2026 Watheeq Escrow Inc. All rights reserved | safewatheeq.com',
+                footerReg: 'Compliant with Saudi eCommerce and Digital Escrow Regulations',
+                curr: ' SAR'
             }
+        };
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            const htmlTag = document.getElementById('htmlTag');
+            const data = i18n[currentLang];
+
+            htmlTag.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            htmlTag.setAttribute('lang', currentLang);
+
+            document.getElementById('langBtn').innerText = data.langBtn;
+            document.getElementById('navCalc').innerText = data.navCalc;
+            document.getElementById('navSec').innerText = data.navSec;
+            document.getElementById('navLive').innerText = data.navLive;
+            document.getElementById('navVerify').innerText = data.navVerify;
+            document.getElementById('btnNav').innerText = data.btnNav;
+            
+            document.getElementById('heroBadge').innerText = data.heroBadge;
+            document.getElementById('heroHeadline').innerHTML = data.heroHeadline;
+            document.getElementById('heroSub').innerText = data.heroSub;
+            document.getElementById('heroBtn1').innerHTML = data.heroBtn1;
+            document.getElementById('heroBtn2').innerText = data.heroBtn2;
+
+            document.getElementById('stat1Label').innerText = data.stat1Label;
+            document.getElementById('stat1Sub').innerText = data.stat1Sub;
+            document.getElementById('stat2Label').innerText = data.stat2Label;
+            document.getElementById('stat2Sub').innerText = data.stat2Sub;
+            document.getElementById('stat3Label').innerText = data.stat3Label;
+            document.getElementById('stat3Sub').innerText = data.stat3Sub;
+            document.getElementById('stat4Label').innerText = data.stat4Label;
+
+            document.getElementById('calcHead').innerText = data.calcHead;
+            document.getElementById('calcSub').innerText = data.calcSub;
+            document.getElementById('lblAmount').innerText = data.lblAmount;
+            document.getElementById('lblCat').innerText = data.lblCat;
+            document.getElementById('opt1').innerText = data.opt1;
+            document.getElementById('opt2').innerText = data.opt2;
+            document.getElementById('opt3').innerText = data.opt3;
+            document.getElementById('opt4').innerText = data.opt4;
+            document.getElementById('resSeller').innerText = data.resSeller;
+            document.getElementById('resFee').innerText = data.resFee;
+            document.getElementById('resTotal').innerText = data.resTotal;
+            document.getElementById('calcBtn').innerText = data.calcBtn;
+
+            document.getElementById('secHead').innerText = data.secHead;
+            document.getElementById('secSub').innerText = data.secSub;
+            document.getElementById('sec1Title').innerText = data.sec1Title;
+            document.getElementById('sec1Desc').innerText = data.sec1Desc;
+            document.getElementById('sec2Title').innerText = data.sec2Title;
+            document.getElementById('sec2Desc').innerText = data.sec2Desc;
+            document.getElementById('sec3Title').innerText = data.sec3Title;
+            document.getElementById('sec3Desc').innerText = data.sec3Desc;
+
+            document.getElementById('mTitle').innerText = data.mTitle;
+            document.getElementById('mSub').innerText = data.mSub;
+            document.getElementById('mLabel1').innerText = data.mLabel1;
+            document.getElementById('mLabel2').innerText = data.mLabel2;
+            document.getElementById('mLabel3').innerText = data.mLabel3;
+            document.getElementById('mLabel4').innerText = data.mLabel4;
+            document.getElementById('mLabel5').innerText = data.mLabel5;
+            document.getElementById('mBtnSubmit').innerText = data.mBtnSubmit;
+            document.getElementById('mBtnCancel').innerText = data.mBtnCancel;
+
+            document.getElementById('vTitle').innerText = data.vTitle;
+            document.getElementById('vSub').innerText = data.vSub;
+            document.getElementById('vBtn1').innerText = data.vBtn1;
+            document.getElementById('vBtn2').innerText = data.vBtn2;
+
+            document.getElementById('footerRights').innerText = data.footerRights;
+            document.getElementById('footerReg').innerText = data.footerReg;
+
             runCalculator();
         }
 
@@ -546,13 +729,13 @@ def serve_home():
             
             if(cat === 'car_deposit') {
                 fee = (amount * 1.0) / 100;
-                if(fee > 50) fee = 50; // سقف أقصى 50 ريال لكسر سوق السيارات
+                if(fee > 50) fee = 50;
             } else if(cat === 'goods') {
                 fee = (amount * 1.0) / 100;
             }
 
             const total = amount + fee;
-            const cur = isAr ? ' ريال' : ' SAR';
+            const cur = i18n[currentLang].curr;
 
             document.getElementById('calcNet').innerText = amount.toLocaleString() + cur;
             document.getElementById('calcFee').innerText = fee.toLocaleString() + cur;
@@ -575,13 +758,14 @@ def serve_home():
 
         async function submitDeal() {
             const title = document.getElementById('newTitle').value;
-            const category = document.getElementById('newCategory').value;
+            const categoryElem = document.getElementById('newCategory');
+            const category = categoryElem.options[categoryElem.selectedIndex].text;
             const price = parseFloat(document.getElementById('newPrice').value);
             const seller_name = document.getElementById('newSeller').value;
             const buyer_name = document.getElementById('newBuyer').value;
 
             if(!title || !price || !seller_name) {
-                alert('يرجى تعبئة الحقول الأساسية');
+                alert(currentLang === 'ar' ? 'يرجى تعبئة الحقول الأساسية' : 'Please fill required fields');
                 return;
             }
 
@@ -614,15 +798,15 @@ def serve_deal_room(deal_id: str):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>غرفة الوساطة {deal['id']} | Watheeq</title>
+    <title>غرفة الضمان {deal['id']} | وثيق</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body {{ font-family: 'Inter', 'Tajawal', sans-serif; background-color: #030303; color: #ffffff; }}
-        .card-dark {{ background: rgba(12, 12, 14, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); }}
+        body {{ font-family: 'Tajawal', 'Inter', sans-serif; background-color: #050507; color: #ffffff; }}
+        .card-dark {{ background: rgba(14, 14, 18, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); }}
         .btn-white {{ background: #ffffff; color: #000000; transition: all 0.2s; }}
         .btn-white:hover {{ background: #e2e8f0; transform: scale(1.02); }}
-        .btn-glass {{ background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; }}
+        .btn-glass {{ background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ffffff; }}
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -635,8 +819,8 @@ def serve_deal_room(deal_id: str):
             <p class="text-xs text-slate-400 mb-6">المبلغ يُحجز مشفراً ولا يُحول للبائع إلا بعد فحصك وموافقتك التامة.</p>
             
             <div class="bg-black/60 border border-white/10 p-4 rounded-2xl mb-6 text-right space-y-2 text-sm font-mono">
-                <div class="flex justify-between text-slate-400"><span>المبلغ الإجمالي:</span><span class="text-emerald-400 font-bold text-base">{deal['total_paid']:,} SAR</span></div>
-                <div class="flex justify-between text-xs text-slate-500"><span>شامل رسوم الضمان ({deal['fee_percent']}%):</span><span>{deal['fee_amount']} SAR</span></div>
+                <div class="flex justify-between text-slate-400"><span>المبلغ الإجمالي:</span><span class="text-emerald-400 font-bold text-base">{deal['total_paid']:,} ريال</span></div>
+                <div class="flex justify-between text-xs text-slate-500"><span>شامل رسوم الضمان ({deal['fee_percent']}%):</span><span>{deal['fee_amount']} ريال</span></div>
             </div>
 
             <!-- خيارات الدفع الفورية -->
@@ -655,20 +839,18 @@ def serve_deal_room(deal_id: str):
     <!-- Header -->
     <header class="border-b border-white/5 bg-black/60 backdrop-blur sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4.5 12.75l6 6 9-13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                </svg>
-                <span class="text-lg font-bold tracking-tight text-white uppercase">Watheeq</span>
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center font-black text-sm text-white">و</div>
+                <span class="text-lg font-black tracking-tight text-white">وثيق</span>
             </a>
-            <span class="text-xs bg-white/5 px-3 py-1.5 rounded-full border border-white/10 text-slate-300 font-mono">Deal ID: {deal['id']}</span>
+            <span class="text-xs bg-white/5 px-3 py-1.5 rounded-full border border-white/10 text-slate-300 font-mono">رقم الصفقة: {deal['id']}</span>
         </div>
     </header>
 
     <!-- شريط حالة الصفقة والمؤقت -->
     <div class="bg-white/[0.02] border-b border-white/5 py-2 px-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2 font-mono">
-        <span>⏱️ AUTO-REFUND TIMER:</span>
-        <span id="countdownTimer" class="text-white font-bold">{'09:59' if not is_pending else 'WAITING FOR DEPOSIT'}</span>
+        <span>⏱️ مؤقت الاسترجاع التلقائي:</span>
+        <span id="countdownTimer" class="text-white font-bold">{'09:59' if not is_pending else 'بانتظار الإيداع'}</span>
         <span>(تسترجع الأموال فورياً في حال عدم التسليم)</span>
     </div>
 
@@ -684,14 +866,14 @@ def serve_deal_room(deal_id: str):
                 <h2 class="text-lg font-bold text-white mb-4">{deal['title']}</h2>
                 
                 <div class="border-t border-white/10 pt-4 space-y-2 text-xs font-mono">
-                    <div class="flex justify-between text-slate-400"><span>مبلغ الصفقة:</span><span class="text-white font-bold">{deal['price']:,} SAR</span></div>
-                    <div class="flex justify-between text-slate-400"><span>عمولة الضمان:</span><span class="text-slate-300">{deal['fee_amount']} SAR</span></div>
-                    <div class="flex justify-between text-slate-400 border-t border-white/10 pt-2 text-sm"><span>الإجمالي المجمّد:</span><span class="text-emerald-400 font-bold">{deal['total_paid']:,} SAR</span></div>
+                    <div class="flex justify-between text-slate-400"><span>مبلغ الصفقة:</span><span class="text-white font-bold">{deal['price']:,} ريال</span></div>
+                    <div class="flex justify-between text-slate-400"><span>عمولة الضمان:</span><span class="text-slate-300">{deal['fee_amount']} ريال</span></div>
+                    <div class="flex justify-between text-slate-400 border-t border-white/10 pt-2 text-sm"><span>الإجمالي المجمّد:</span><span class="text-emerald-400 font-bold">{deal['total_paid']:,} ريال</span></div>
                 </div>
 
                 <div class="border-t border-white/10 mt-4 pt-4 text-xs space-y-2 text-slate-400">
-                    <div class="flex items-center justify-between"><span>البائع:</span><span class="text-white">{deal['seller_name']}</span></div>
-                    <div class="flex items-center justify-between"><span>المشتري:</span><span class="text-white">{deal['buyer_name']}</span></div>
+                    <div class="flex items-center justify-between"><span>👤 البائع:</span><span class="text-white">{deal['seller_name']}</span></div>
+                    <div class="flex items-center justify-between"><span>👤 المشتري:</span><span class="text-white">{deal['buyer_name']}</span></div>
                 </div>
             </div>
 
@@ -712,9 +894,9 @@ def serve_deal_room(deal_id: str):
             <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/40">
                 <div class="flex items-center gap-2">
                     <div class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-bold text-white uppercase tracking-wider">Secure Deal Chat</span>
+                    <span class="text-xs font-bold text-white uppercase tracking-wider">سجل المحادثة وتوثيق التسليم</span>
                 </div>
-                <span class="text-[11px] text-slate-500 font-mono">🔒 E2E Encrypted Record</span>
+                <span class="text-[11px] text-slate-500 font-mono">🔒 مشفرة ومحمية</span>
             </div>
 
             <!-- الرسائل -->
