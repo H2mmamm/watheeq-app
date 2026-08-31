@@ -27,7 +27,7 @@ def get_db():
             conn = psycopg2.connect(DATABASE_URL)
             return conn
         except Exception as e:
-            print("DB Connection Error (Logged securely)")
+            print("DB Connection Error:", e)
             return None
     return None
 
@@ -55,7 +55,7 @@ def init_db():
                 INSERT INTO deals (id, title, category, price, fee_percent, fee_amount, total_paid, seller_name, buyer_name, status, status_note, messages)
                 VALUES (
                     'WTQ-701',
-                    'عربون حجز وفحص مركبة / Vehicle Escrow',
+                    'عربون حجز وفحص مركبة',
                     'مركبات ومعدات وعرابين (1.5%)',
                     2500.0,
                     1.5,
@@ -255,11 +255,12 @@ def serve_verify_page():
 <body class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
     <h1 class="text-3xl font-bold mb-4">Verify Watheeq Vault Record</h1>
     <input id="did" type="text" placeholder="WTQ-701" class="bg-black border border-white/20 p-3 rounded-xl text-center text-white font-mono mb-4 w-64">
+    <br>
     <button onclick="location.href='/deal/'+document.getElementById('did').value" class="bg-white text-black font-bold px-6 py-2.5 rounded-xl text-xs">Inspect Record</button>
 </body>
 </html>"""
 
-# صفحة تسجيل الدخول وإنشاء الحساب الكاملة والمدعومة باللغتين بنسبة 100%
+# صفحة تسجيل الدخول والإنشاء بنظام ترجمة حقيقي وشامل 100%
 @app.get("/login", response_class=HTMLResponse)
 def serve_login():
     return """<!DOCTYPE html>
@@ -299,18 +300,17 @@ def serve_login():
             <h1 id="txtTitle" class="text-2xl font-black text-white mb-2">تسجيل الدخول</h1>
             <p id="txtSub" class="text-xs text-slate-400 mb-8">البريد الإلكتروني / رقم الهوية</p>
             
-            <!-- نموذج تسجيل الدخول أو إنشاء الحساب الحقيقي -->
-            <div class="space-y-4 text-right" id="formContainer">
+            <div class="space-y-4" id="formContainer">
                 
                 <div id="signupFields" class="hidden space-y-4">
                     <div class="grid grid-cols-2 gap-2">
-                        <input id="inputFirstName" type="text" placeholder="الاسم الأول" class="w-full input-box rounded-xl p-3 text-xs">
-                        <input id="inputLastName" type="text" placeholder="اسم العائلة" class="w-full input-box rounded-xl p-3 text-xs">
+                        <input id="inputFirstName" type="text" placeholder="الاسم الأول" class="w-full input-box rounded-xl p-3 text-xs text-center">
+                        <input id="inputLastName" type="text" placeholder="اسم العائلة" class="w-full input-box rounded-xl p-3 text-xs text-center">
                     </div>
                 </div>
 
-                <input id="inputUser" type="text" placeholder="name@domain.com أو رقم الهوية" class="w-full input-box rounded-xl p-3.5 text-xs font-mono">
-                <input id="inputPassword" type="password" placeholder="كلمة المرور" class="w-full input-box rounded-xl p-3.5 text-xs">
+                <input id="inputUser" type="text" placeholder="name@domain.com أو رقم الهوية" class="w-full input-box rounded-xl p-3.5 text-xs text-center font-mono">
+                <input id="inputPassword" type="password" placeholder="كلمة المرور" class="w-full input-box rounded-xl p-3.5 text-xs text-center">
 
                 <button onclick="submitAuth()" id="btnSubmitAction" class="w-full yellow-btn font-bold py-3.5 rounded-xl text-sm mt-2">تسجيل الدخول</button>
                 
@@ -345,6 +345,8 @@ def serve_login():
                 signupSub: 'سجل بياناتك لإنشاء حساب وساطة موثق',
                 placeholderUser: 'name@domain.com أو رقم الهوية',
                 placeholderPass: 'كلمة المرور الآمنة',
+                placeholderFirst: 'الاسم الأول',
+                placeholderLast: 'اسم العائلة',
                 btnLogin: 'تسجيل الدخول',
                 btnSignup: 'إنشاء الحساب الآن',
                 google: 'المتابعة باستخدام Google',
@@ -365,6 +367,8 @@ def serve_login():
                 signupSub: 'Register your details for secure escrow',
                 placeholderUser: 'name@domain.com or ID',
                 placeholderPass: 'Secure Password',
+                placeholderFirst: 'First Name',
+                placeholderLast: 'Last Name',
                 btnLogin: 'Sign In',
                 btnSignup: 'Create Account',
                 google: 'Continue with Google',
@@ -404,6 +408,8 @@ def serve_login():
             document.getElementById('txtSub').innerText = isSignup ? t.signupSub : t.loginSub;
             document.getElementById('inputUser').placeholder = t.placeholderUser;
             document.getElementById('inputPassword').placeholder = t.placeholderPass;
+            document.getElementById('inputFirstName').placeholder = t.placeholderFirst;
+            document.getElementById('inputLastName').placeholder = t.placeholderLast;
             document.getElementById('btnSubmitAction').innerText = isSignup ? t.btnSignup : t.btnLogin;
             document.getElementById('txtGoogle').innerText = t.google;
             document.getElementById('txtApple').innerText = t.apple;
@@ -439,7 +445,6 @@ def serve_home():
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Tajawal', 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; }
-        /* واجهة متحركة فاخرة مع خلفية متوهجة متحركة */
         .hero-glow {
             background: radial-gradient(circle at 50% 20%, rgba(252, 213, 53, 0.12) 0%, rgba(3, 3, 3, 0.98) 70%);
             animation: pulseGlow 6s ease-in-out infinite alternate;
@@ -458,15 +463,14 @@ def serve_home():
         🛡️ حماية الوساطة الإلزامية: تجميد الأموال بالخزينة يضمن حقوق البائع والمشتري بنسبة 100%.
     </div>
 
-    <!-- نافذة إنشاء غرفة صفقة -->
     <div id="createModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
+        <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right" id="modalBox">
             <h3 class="text-xl font-black text-white mb-1" id="mHead">إنشاء غرفة وساطة جديدة</h3>
             <div class="space-y-4 mt-4">
                 <input id="newTitle" type="text" placeholder="عنوان الصفقة (مثال: عربون سيارة / حساب)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
                 <select id="newCategory" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
-                    <option>الأصول الرقمية والألعاب (2.5%)</option>
-                    <option>مركبات وعرابين (1.5%)</option>
+                    <option id="opt1">الأصول الرقمية والألعاب (2.5%)</option>
+                    <option id="opt2">مركبات وعرابين (1.5%)</option>
                 </select>
                 <input id="newPrice" type="number" placeholder="المبلغ (ريال)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
                 <input id="newSeller" type="text" placeholder="يوزر البائع" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
@@ -479,9 +483,8 @@ def serve_home():
         </div>
     </div>
 
-    <!-- نافذة ربط الحساب البنكي -->
     <div id="bankModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-right">
+        <div class="card-dark p-8 rounded-3xl max-w-md w-full border border-white/20 text-right" id="bankBox">
             <h3 class="text-xl font-black text-white mb-2" id="bHead">🏦 ربط الحساب البنكي واستلام الأرباح</h3>
             <p class="text-xs text-slate-400 mb-6" id="bSub">اربط حسابك التجاري أو الآيبان (IBAN) لتحويل عمولات المنصة تلقائياً.</p>
             <div class="space-y-3 mb-6">
@@ -523,6 +526,7 @@ def serve_home():
         const homeTexts = {
             ar: {
                 dir: 'rtl',
+                align: 'text-right',
                 banner: '🛡️ حماية الوساطة الإلزامية: تجميد الأموال بالخزينة يضمن حقوق البائع والمشتري بنسبة 100%.',
                 lang: 'English',
                 signIn: 'Sign In',
@@ -530,10 +534,26 @@ def serve_home():
                 create: '+ إنشاء صفقة',
                 title: 'The immutable standard of escrow.',
                 sub: 'المنصة الآمنة لتجميد أموال العربون والصفقات ومنع النصب المالي تماماً.',
-                demo: 'معاينة الغرفة التجريبية النشطة 🛡️'
+                demo: 'معاينة الغرفة التجريبية النشطة 🛡️',
+                mHead: 'إنشاء غرفة وساطة جديدة',
+                mTitlePh: 'عنوان الصفقة (مثال: عربون سيارة / حساب)',
+                mPricePh: 'المبلغ (ريال)',
+                mSellerPh: 'يوزر البائع',
+                mBuyerPh: 'يوزر المشتري',
+                mCreate: 'إنشاء الغرفة الآمنة 🔒',
+                mClose: 'إغلاق',
+                bHead: '🏦 ربط الحساب البنكي واستلام الأرباح',
+                bSub: 'اربط حسابك التجاري أو الآيبان (IBAN) لتحويل عمولات المنصة تلقائياً.',
+                bHolder: 'اسم صاحب الحساب التجاري',
+                bSave: 'حفظ وربط الحساب البنكي 💳',
+                bClose: 'إغلاق',
+                opt1: 'الأصول الرقمية والألعاب (2.5%)',
+                opt2: 'مركبات وعرابين (1.5%)',
+                alertReq: 'أدخل الحقول المطلوبة'
             },
             en: {
                 dir: 'ltr',
+                align: 'text-left',
                 banner: '🛡️ Mandatory Escrow Protection: Freezing funds in the vault guarantees 100% rights for both parties.',
                 lang: 'العربية',
                 signIn: 'Sign In',
@@ -541,7 +561,22 @@ def serve_home():
                 create: '+ Create Deal',
                 title: 'The immutable standard of escrow.',
                 sub: 'The ultimate secure platform to freeze deposits and eliminate financial fraud completely.',
-                demo: 'Preview Live Demo Vault 🛡️'
+                demo: 'Preview Live Demo Vault 🛡️',
+                mHead: 'Create New Escrow Room',
+                mTitlePh: 'Deal Title (e.g. Car Deposit / Gaming Account)',
+                mPricePh: 'Amount (SAR)',
+                mSellerPh: 'Seller Username',
+                mBuyerPh: 'Buyer Username',
+                mCreate: 'Create Secure Vault 🔒',
+                mClose: 'Close',
+                bHead: '🏦 Link Bank Account & Payouts',
+                bSub: 'Link your commercial account or IBAN for automated platform commission transfers.',
+                bHolder: 'Commercial Account Holder Name',
+                bSave: 'Save & Link Bank Account 💳',
+                bClose: 'Close',
+                opt1: 'Digital Assets & Gaming (2.5%)',
+                opt2: 'Vehicles & Deposits (1.5%)',
+                alertReq: 'Please fill required fields'
             }
         };
 
@@ -558,6 +593,24 @@ def serve_home():
             document.getElementById('homeHeroTitle').innerText = t.title;
             document.getElementById('homeHeroSub').innerText = t.sub;
             document.getElementById('homeDemoBtn').innerText = t.demo;
+            
+            document.getElementById('modalBox').className = 'card-dark p-8 rounded-3xl max-w-lg w-full border border-white/25 ' + t.align;
+            document.getElementById('bankBox').className = 'card-dark p-8 rounded-3xl max-w-md w-full border border-white/25 ' + t.align;
+            
+            document.getElementById('mHead').innerText = t.mHead;
+            document.getElementById('newTitle').placeholder = t.mTitlePh;
+            document.getElementById('newPrice').placeholder = t.mPricePh;
+            document.getElementById('newSeller').placeholder = t.mSellerPh;
+            document.getElementById('newBuyer').placeholder = t.mBuyerPh;
+            document.getElementById('mCreateBtn').innerText = t.mCreate;
+            document.getElementById('mCloseBtn').innerText = t.mClose;
+            
+            document.getElementById('bHead').innerText = t.bHead;
+            document.getElementById('bSub').innerText = t.bSub;
+            document.getElementById('bSaveBtn').innerText = t.bSave;
+            document.getElementById('bCloseBtn').innerText = t.bClose;
+            document.getElementById('opt1').innerText = t.opt1;
+            document.getElementById('opt2').innerText = t.opt2;
         }
 
         async function submitDeal() {
@@ -566,7 +619,8 @@ def serve_home():
             const price = parseFloat(document.getElementById('newPrice').value);
             const seller_name = document.getElementById('newSeller').value;
             const buyer_name = document.getElementById('newBuyer').value;
-            if(!title || !price) { alert(homeLang === 'ar' ? 'أدخل الحقول المطلوبة' : 'Please fill required fields'); return; }
+            const t = homeTexts[homeLang];
+            if(!title || !price) { alert(t.alertReq); return; }
             const res = await fetch('/api/deals/create', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title, category, price, seller_name, buyer_name})});
             const data = await res.json();
             if(data.status === 'success') location.href = '/deal/' + data.deal_id;
