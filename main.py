@@ -192,14 +192,12 @@ def send_chat(deal_id: str, req: MessageRequest):
     sender_name = html.escape(req.sender)
     deal["messages"].append({"sender": sender_name, "text": req.text, "time": "الآن"})
     
-    # رد تلقائي ذكي من نظام AI للإشراف على الصفقة
     ai_response = f"أهلاً بك يا {sender_name}. نظام الذكاء الاصطناعي يراقب هذه المحادثة لضمان حقوق الطرفين وعدم حدوث أي احتيال."
     deal["messages"].append({"sender": "مشرف الذكاء الاصطناعي (Watheeq AI)", "text": ai_response, "time": "الآن"})
     
     save_deal(deal)
     return {"status": "success", "messages": deal["messages"]}
 
-# صفحة تسجيل الدخول واختيار الحسابات الكبرى
 @app.get("/login", response_class=HTMLResponse)
 def serve_login():
     return """<!DOCTYPE html>
@@ -207,7 +205,7 @@ def serve_login():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">تسجيل الدخول الآمن | وثيق Watheeq</title>
+    <title>تسجيل الدخول الآمن | وثيق Watheeq</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>body { font-family: 'Tajawal', sans-serif; background-color: #0b0e11; color: #eaecef; }</style>
@@ -268,7 +266,6 @@ def serve_login():
 </body>
 </html>"""
 
-# الرئيسية الفخمة مع دعم نفاذ، الترجمة، وإشراف الذكاء الاصطناعي
 @app.get("/", response_class=HTMLResponse)
 def serve_home():
     return """<!DOCTYPE html>
@@ -287,14 +284,13 @@ def serve_home():
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
-    <div class="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6 text-center text-xs font-semibold text-amber-300" id="topBanner">
+    <div class="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6 text-center text-xs font-semibold text-amber-300">
         🛡️ نظام الضمان الإلزامي بإشراف الذكاء الاصطناعي: تجميد الأموال بالخزينة لحماية الطرفين 100%.
     </div>
 
-    <!-- نافذة إنشاء صفقة -->
     <div id="createModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="card-dark p-8 rounded-3xl max-w-lg w-full border border-white/20 text-right">
-            <h3 class="text-xl font-black text-white mb-4" id="mHead">إنشاء غرفة وساطة ذكية (AI Escrow)</h3>
+            <h3 class="text-xl font-black text-white mb-4">إنشاء غرفة وساطة ذكية (AI Escrow)</h3>
             <div class="space-y-4">
                 <input id="newTitle" type="text" placeholder="عنوان الصفقة (مثال: عربون مركبة / حساب ديسكورد)" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
                 <select id="newCategory" class="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-white text-xs">
@@ -345,7 +341,6 @@ def serve_home():
             document.getElementById('homeLangBtn').innerText = homeLang === 'ar' ? 'English' : 'العربية';
             document.getElementById('homeSignIn').innerText = homeLang === 'ar' ? 'Sign In' : 'تسجيل الدخول';
             document.getElementById('homeCreateBtn').innerText = homeLang === 'ar' ? '+ إنشاء صفقة' : '+ Create Deal';
-            document.getElementById('homeHeroTitle').innerText = homeLang === 'ar' ? 'The immutable standard of escrow.' : 'The immutable standard of escrow.';
             document.getElementById('homeHeroSub').innerText = homeLang === 'ar' ? 'المنصة الآمنة لتجميد أموال العربون والصفقات ومنع النصب بإشراف الذكاء الاصطناعي.' : 'The ultimate secure platform to freeze deposits and prevent fraud with AI supervision.';
             document.getElementById('homeDemoBtn').innerText = homeLang === 'ar' ? 'معاينة الغرفة التجريبية المشرفة من AI 🛡️' : 'Preview AI-Supervised Live Demo Vault 🛡️';
         }
