@@ -413,17 +413,15 @@ def serve_deal_room(deal_id: str):
         © 2026 WATHEEQ AI ESCROW PLATFORM
     </footer>
 
-    <script>
-        async function payDeal(dealId) {
-            const res = await fetch('/api/deals/' + dealId + '/pay', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({payment_method:'Apple Pay'})});
-            if(res.ok) location.reload();
-        }
-        async function sendMessage(dealId) {
-            const text = document.getElementById('chatInput').value;
-            if(!text) return;
-            const res = await fetch('/api/deals/' + dealId + '/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({sender:'المستخدم', text})});
-            if(res.ok) location.reload();
-        }
-    </script>
+    async function payDeal(dealId) {
+    const res = await fetch(`/api/deals/` + dealId + `/pay`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({payment_method:'Apple Pay'})});
+    if(res.ok) location.reload();
+}
+async function sendMessage(dealId) {
+    const text = document.getElementById('chatInput').value;
+    if(!text) return;
+    const res = await fetch(`/api/deals/` + dealId + `/chat`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text})});
+    if(res.ok) location.reload();
+}
 </body>
 </html>"""
